@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Ofrohn.GitHub.io by ofrohn</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Ofrohn.GitHub.io</h1>
+      <h2 class="project-tagline"></h2>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="celestial-map-with-d3js" class="anchor" href="#celestial-map-with-d3js" aria-hidden="true"><span class="octicon octicon-link"></span></a>Celestial map with D3.js</h1>
+
+<p>Interactive, adaptable celestial map done with the <a href="http://d3js.org/">D3.js</a> visualization library. So, GeoJSON for sky stuff. Which surprisingly nobody has done yet, it seems.  </p>
+
+<p>Features display of stars and deep sky objects (DSOs) with a selectable magnitude limit up to 6, or choose different GeoJSON data source for higher magnitudes. Also shows constellations with names, lines and/or boundaries, the Milky Way band and grid lines. Alternate coordinate spaces e.g. ecliptc, galactic or supergalactic are also possible. Full support for zoom and rotation with mouse or gestures.</p>
+
+<p>Since it uses D3 and therefore SVG, it needs a modern browser with svg support, so any recent flavor of Chrome/Firefox/Safari/Opera or IE 9 and above should suffice. Check out the demo at &lt;insert link here&gt; or download the tarball <code>celestial.tar.gz</code> containing everything for local usage, which works with Firefox; Chrome needs to be started with command line parameter  <code>--allow-file-access-from-files</code> to load local json files. Or use a local web server environment.</p>
+
+<h3>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h3>
+
+<p>Include the necessary scripts d3.min.js, d3.geo.projection.min.js and celestial.js from the <code>lib</code> subfolder or the first two alternatively from the official d3.js server <code>http://d3js.org/</code>, and then simply edit the default options and display the map with <code>Celestial.display(config)</code>.</p>
+
+<div class="highlight highlight-js"><pre><span class="pl-k">var</span> config <span class="pl-k">=</span> { 
+  width<span class="pl-k">:</span> <span class="pl-c1">0</span>,           <span class="pl-c">// Default width, 0 = full parent element width; </span>
+                      <span class="pl-c">// height is determined by projection</span>
+  projection<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>aitoff<span class="pl-pds">"</span></span>,    <span class="pl-c">// Map projection used: see below</span>
+  transform<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>equatorial<span class="pl-pds">"</span></span>, <span class="pl-c">// Coordinate transformation: equatorial (default),</span>
+                           <span class="pl-c">// ecliptic, galactic, supergalactic</span>
+  center<span class="pl-k">:</span> <span class="pl-c1">null</span>,       <span class="pl-c">// Initial center coordinates in equatorial transformation only</span>
+                      <span class="pl-c">// [hours, degrees], null = default center</span>
+  background<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>#000<span class="pl-pds">"</span></span>, <span class="pl-c">// Background color or gradient  </span>
+  adaptable<span class="pl-k">:</span> <span class="pl-c1">true</span>,    <span class="pl-c">// Sizes are increased with higher zoom-levels</span>
+  interactive<span class="pl-k">:</span> <span class="pl-c1">true</span>,  <span class="pl-c">// Enable zooming and rotation with mousewheel and dragging</span>
+  container<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>map<span class="pl-pds">"</span></span>,   <span class="pl-c">// ID of parent element, e.g. div</span>
+  datapath<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>data/<span class="pl-pds">"</span></span>,  <span class="pl-c">// Path/URL to data files, empty = subfolder 'data'</span>
+  stars<span class="pl-k">:</span> {
+    show<span class="pl-k">:</span> <span class="pl-c1">true</span>,    <span class="pl-c">// Show stars</span>
+    limit<span class="pl-k">:</span> <span class="pl-c1">6</span>,      <span class="pl-c">// Show only stars brighter than limit magnitude</span>
+    colors<span class="pl-k">:</span> <span class="pl-c1">true</span>,  <span class="pl-c">// Show stars in spectral colors, if not use default color</span>
+    color<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>#fff<span class="pl-pds">"</span></span>, <span class="pl-c">// Default color for stars</span>
+    names<span class="pl-k">:</span> <span class="pl-c1">true</span>,   <span class="pl-c">// Show star names (css-class starname)</span>
+    proper<span class="pl-k">:</span> <span class="pl-c1">false</span>, <span class="pl-c">// Show proper names (if none shows designation)</span>
+    desig<span class="pl-k">:</span> <span class="pl-c1">true</span>,   <span class="pl-c">// Show designation (Bayer, Flamsteed, variable star, Gliese, Draper,</span>
+                   <span class="pl-c">// Hipparcos, whichever applies first in the given order)</span>
+    namelimit<span class="pl-k">:</span> <span class="pl-c1">2.5</span>,  <span class="pl-c">// Show only names/designations for stars brighter than namelimit</span>
+    data<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>stars.6.json<span class="pl-pds">'</span></span> <span class="pl-c">// Data source for stellar data, </span>
+                         <span class="pl-c">// number indicates limit magnitude</span>
+  },
+  dsos<span class="pl-k">:</span> {
+    show<span class="pl-k">:</span> <span class="pl-c1">true</span>,    <span class="pl-c">// Show Deep Space Objects (css-classes per object type)</span>
+    limit<span class="pl-k">:</span> <span class="pl-c1">6</span>,      <span class="pl-c">// Show only DSOs brighter than limit magnitude</span>
+    names<span class="pl-k">:</span> <span class="pl-c1">true</span>,   <span class="pl-c">// Show DSO names</span>
+    desig<span class="pl-k">:</span> <span class="pl-c1">true</span>,   <span class="pl-c">// Show short DSO names</span>
+    namelimit<span class="pl-k">:</span> <span class="pl-c1">6</span>,  <span class="pl-c">// Show only names for DSOs brighter than namelimit</span>
+    data<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>dsos.bright.json<span class="pl-pds">'</span></span>  <span class="pl-c">// Data source for DSOs, </span>
+                              <span class="pl-c">// opt. number indicates limit magnitude</span>
+  },
+  constellations<span class="pl-k">:</span> {
+    show<span class="pl-k">:</span> <span class="pl-c1">true</span>,    <span class="pl-c">// Show constellations </span>
+    names<span class="pl-k">:</span> <span class="pl-c1">true</span>,   <span class="pl-c">// Show constellation names (css-class: constname)</span>
+    desig<span class="pl-k">:</span> <span class="pl-c1">true</span>,   <span class="pl-c">// Show short constellation names (3 letter designations)</span>
+    lines<span class="pl-k">:</span> <span class="pl-c1">true</span>,   <span class="pl-c">// Show constellation lines (css-class: constline)</span>
+    bounds<span class="pl-k">:</span> <span class="pl-c1">false</span>  <span class="pl-c">// Show constellation boundaries (css-class: boundaryline)</span>
+  },
+  mw<span class="pl-k">:</span> {
+    show<span class="pl-k">:</span> <span class="pl-c1">true</span>     <span class="pl-c">// Show Milky Way as filled multi-polygon outlines (css-class: mw)</span>
+  },
+  lines<span class="pl-k">:</span> {
+    graticule<span class="pl-k">:</span> <span class="pl-c1">true</span>,   <span class="pl-c">// Show graticule lines (css-class: gridline)</span>
+    equatorial<span class="pl-k">:</span> <span class="pl-c1">false</span>, <span class="pl-c">// Show equatorial plane (css-class: equatorial)</span>
+    ecliptic<span class="pl-k">:</span> <span class="pl-c1">true</span>,    <span class="pl-c">// Show ecliptic plane (css-class: ecliptic)</span>
+    galactic<span class="pl-k">:</span> <span class="pl-c1">false</span>,   <span class="pl-c">// Show galactic plane (css-class: galactic)</span>
+    supergalactic<span class="pl-k">:</span> <span class="pl-c1">false</span>  <span class="pl-c">// Show supergalactic plane (css-class: supergalactic)</span>
+  }
+};
+
+<span class="pl-c">// Display map with the configuration above</span>
+Celestial.<span class="pl-c1">display</span>(config);</pre></div>
+
+<p><strong>Supported projections:</strong> airy, aitoff, armadillo, august, azimuthalEqualArea, azimuthalEquidistant, baker, berghaus, boggs, bonne, bromley, collignon, craig, craster, cylindricalEqualArea, cylindricalStereographic, eckert1, eckert2, eckert3, eckert4, eckert5, eckert6, eisenlohr, equirectangular, fahey, foucaut, ginzburg4, ginzburg5, ginzburg6, ginzburg8, ginzburg9, gringorten, hammer, hatano, healpix, hill, homolosine, kavrayskiy7, lagrange, larrivee, laskowski, loximuthal, mercator, miller, mollweide, mtFlatPolarParabolic, mtFlatPolarQuartic, mtFlatPolarSinusoidal, naturalEarth, nellHammer, orthographic, patterson, polyconic, rectangularPolyconic, robinson, sinusoidal, stereographic, times, twoPointEquidistant, vanDerGrinten, vanDerGrinten2, vanDerGrinten3, vanDerGrinten4, wagner4, wagner6, wagner7, wiechel, winkel3<br>
+most of these need the extension <a href="https://github.com/d3/d3-geo-projection/">d3.geo.projections</a>  </p>
+
+<h3>
+<a id="files" class="anchor" href="#files" aria-hidden="true"><span class="octicon octicon-link"></span></a>Files</h3>
+
+<p><strong>GeoJSON data files</strong></p>
+
+<ul>
+<li>
+<code>stars.6.json</code> Stars down to 6th magnitude [1]</li>
+<li><p><code>stars.8.json</code> Stars down to 8.5th magnitude [1]</p></li>
+<li><p><code>dsos.6.json</code> Deep space objects down to 6th magnitude [2]</p></li>
+<li>
+<code>dsos.14.json</code> Deep space objects down to 14th magnitude [2]</li>
+<li><p><code>dsos.bright.json</code> Some of the brightest showpiece DSOs of my own choosing</p></li>
+<li><p><code>constellations.json</code> Constellation data  [3]</p></li>
+<li>
+<code>constellations.bounds.json</code> Constellation boundaries [4]</li>
+<li><p><code>constellations.lines.json</code> Constellation lines [3]</p></li>
+<li><p><code>mw.json</code> Milky Way outlines in 5 brightness steps [5]</p></li>
+<li><p><code>templ.json</code> GeoJSON templates for all the different object types used</p></li>
+</ul>
+
+<p><strong>Sources</strong></p>
+
+<ul>
+<li>[1] XHIP: An Extended Hipparcos Compilation; Anderson E., Francis C. (2012) <a href="http://cdsarc.u-strasbg.fr/viz-bin/Cat?V/137D">VizieR V/137D</a><br>
+<em>Star names &amp; designations:</em><br>
+HD-DM-GC-HR-HIP-Bayer-Flamsteed Cross Index (Kostjuk, 2002) <a href="http://cdsarc.u-strasbg.fr/viz-bin/Cat?IV/27A">VizieR IV/27A</a><br>
+FK5-SAO-HD-Common Name Cross Index (Smith 1996) <a href="http://cdsarc.u-strasbg.fr/viz-bin/Cat?IV/22">VizieR IV/22</a><br>
+General Catalogue of Variable Stars (Samus et.al. 2007-2013) <a href="http://cdsarc.u-strasbg.fr/viz-bin/Cat?B/gcvs">VizieR B/gcvs</a><br>
+Preliminary Version of the Third Catalogue of Nearby Stars (Gliese+ 1991) <a href="http://cdsarc.u-strasbg.fr/viz-bin/Cat?V/70A">VizieR V/70A</a><br>
+</li>
+<li>[2] <a href="http://www.saguaroastro.org/content/downloads.htm">Saguaro Astronomy Club Database version 8.1</a><br>
+</li>
+<li>[3] <a href="http://www.iau.org/public/themes/constellations/">IAU Constellation page</a>, name positions and some line modifications by me<br>
+</li>
+<li>[4] Catalogue of Constellation Boundary Data; Davenhall A.C., Leggett S.K. (1989) <a href="http://vizier.cfa.harvard.edu/viz-bin/Cat?VI/49">VizieR VI/49/</a><br>
+</li>
+<li>[5] <a href="http://www.skymap.com/milkyway_cat.htm">Milky Way Outline Catalog</a>, Jose R. Vieira<br>
+</li>
+</ul>
+
+<p>All data converted to GeoJSON at J2000 epoch, positions converted from 0...24h right ascension to -180...180 degrees longitude as per GeoJSON requirements, 0...12h -&gt; 0...180º; 12...24h -&gt; -180...0º</p>
+
+<p><strong>Other files</strong></p>
+
+<ul>
+<li>
+<code>celestial.js</code> main javascript object</li>
+<li>
+<code>celestial.min.js</code>  minified javascript</li>
+<li>
+<code>celestial.tar.gz</code>  data, minified script and viewer, all you need for local display </li>
+<li><code>LICENSE</code></li>
+<li>
+<code>readme.md</code> this file</li>
+<li>
+<code>style.css</code> stylesheet</li>
+<li>
+<code>map.html</code> simple map viewer with editable configuration</li>
+<li>
+<code>viewer.html</code> interactive map viewer/demo</li>
+<li>
+<code>lib/d3.*.js</code>  necessary d3 libraries</li>
+<li>
+<code>src/*.js</code> source code for all modules</li>
+</ul>
+
+<p>Thanks to Mike Bostock and Jason Davies for <a href="http://d3js.org/">D3.js</a> and <a href="https://github.com/d3/d3-geo-projection">d3.geo.projections</a>.
+And also thanks to Jason Davies for <a href="http://www.jasondavies.com/maps/rotate/">d3.geo.zoom</a>, which saved me some major headaches in figuring out how to rotate/zoom the map.</p>
+
+<p>Released under <a href="LICENSE">BSD License</a></p>
+
+      <footer class="site-footer">
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
+
