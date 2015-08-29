@@ -1,90 +1,45 @@
 var shell = require('shelljs/make'),
-    ug = require('uglify-js'),
-    fs = require('fs'),
-    vm = require('vm'),
-    tar = require('tar-fs'),
-    zlib = require('zlib'),
-    copy = "// Copyright 2015 Olaf Frohn https://github.com/ofrohn, see LICENSE\n",
-    begin = "!(function() {",
-    end = "this.Celestial = Celestial;\n})();",
-    filename = './celestial',
-    FINAL = true;
+    fs = require('fs');
 
-    
-target.all = function() {
-  target.test()
-  target.build()
-};
-
-target.test = function() {
-  cd('src');
-
-  //jshint linting
-  ls("*.js").forEach(function(file) {
-    if (exec('jshint ' + file).code !== 0) {
-      echo('JSHINT FAILED');
-      exit(0);
-    }
-  });
-
-  echo('JSHint tests passed');
-  cd('..');
-
-  //run tests
-  cd('test');
-  ls("*-test.js").forEach(function(file) {
-    if (exec('node ' + file).code !== 123) {
-      echo('TEST FAILED for ' + file);
-      exit(0);  
-    }
-  });
-
-  echo('Unit tests passed');
-
-  cd('..');
-};
-
-target.build = function() {
-
-  vm.runInThisContext(fs.readFileSync('./src/celestial.js', 'utf-8'), './src/celestial.js');
-  echo('V' + Celestial.version);
-  if (!FINAL) filename += Celestial.version;
+echo('Copying d3-celestial');
   
-  var file = cat([
-    './src/celestial.js', 
-    './src/projection.js', 
-    './src/transform.js', 
-    './src/config.js', 
-    './src/symbol.js',
-    './lib/d3.geo.zoom.js'
-  ]);
-  file = copy + begin + file.replace(/\/\* global.*/g, '') + end;
-  file.to(filename + '.js');
+cp('-f', [
+  '../d3-celestial/celestial.js', 
+  '../d3-celestial/celestial.min.js', 
+  '../d3-celestial/celestial.tar.gz',
+  '../d3-celestial/readme.md', 
+  '../d3-celestial/style.css',
+  '../d3-celestial/viewer.html'
+], './');
 
-  echo('Minifying');
+mv('-f', 'readme.md', 'celestial-readme.md');
+mv('-f', 'style.css', 'celestial-style.css');
+mv('-f', 'viewer.html', 'celestial-viewer.html');
 
-  var out = ug.minify(filename + '.js');
-  fs.writeFileSync(filename + '.min.js', copy + out.code);
-  /*var read = ug.parse(fs.readFileSync(filename + '.js', "utf8"));
-  read.figure_out_scope();
+sed('-i', 'style.css', 'celestial-style.css', 'celestial-viewer.html');
 
-  var comp = read.transform( UglifyJS.Compressor(); );
-  comp.figure_out_scope();
-  comp.compute_char_frequency();
-  comp.mangle_names();
+cp('-f', '../d3-celestial/data/*', 'data');
+cp('-f', '../d3-celestial/lib/*', 'lib');
 
-  var out = comp.print_to_string();
-  fs.writeFileSync(filename + '.min.js', out);
-  */
+echo('Copying d3-orrery');
 
-  echo('Writing data');
+cp('-f', [
+  '../d3-orrery/orrery.js', 
+  '../d3-orrery/orrery.min.js', 
+  '../d3-orrery/orrery.tar.gz',
+  '../d3-orrery/readme.md', 
+  '../d3-orrery/style.css',
+  '../d3-orrery/viewer.html'
+], './');
 
-  // zip data + prod. code + css
-  tar.pack('./', {
-       entries: ['viewer.html', 'style.css', 'readme.md', 'LICENSE', 'celestial.min.js', 'data', 'lib/d3.min.js', 'lib/d3.geo.projection.min.js'] 
-     })
-     .pipe(zlib.createGzip())
-     .pipe(fs.createWriteStream(filename + '.tar.gz'))
+mv('-f', 'readme.md', 'orrery-readme.md');
+mv('-f', 'style.css', 'orrery-style.css');
+mv('-f', 'viewer.html', 'orrery-viewer.html');
 
-  echo('Done');
-};
+sed('-i', 'style.css', 'orrery-style.css', 'orrery-viewer.html');
+
+cp('-f', '../d3-orrery/data/*', 'data');
+cp('-f', '../d3-orrery/img/*', 'img');
+cp('-f', '../d3-orrery/lib/*', 'lib');
+
+echo('Done');

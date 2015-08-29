@@ -1,25 +1,21 @@
 {
-  "name": "d3-celestial",
-  "version": "0.4.2",
-  "description": "A star map with D3.js",
-  "main": "celestial.js",
+  "name": "ofrohn.github.io",
+  "version": "0.2.0",
+  "description": "ofrohn d3.js projects",
+  "main": "index.html",
   "directories": {
     "test": "test"
   },
   "dependencies": {},
   "devDependencies": {
-    "jsdom": "^3.1.0",
-    "jshint": "^2.6.0",
-    "tar-fs": "^1.4.2",
-    "shelljs": "^0.3.0",
-    "uglify-js": "^2.4.16"
+    "shelljs": "^0.3.0"
   },
   "scripts": {
-    "test": "node test/celestial-test.js"
+    "test": "node test/test.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ofrohn/d3-celestial.git"
+    "url": "https://github.com/ofrohn/ofrohn.github.io"
   },
   "keywords": [
     "cartography",
@@ -30,7 +26,7 @@
   "author": "Olaf Frohn",
   "license": "BSD",
   "bugs": {
-    "url": "https://github.com/ofrohn/d3-celestial/issues"
+    "url": "https://github.com/ofrohn/ofrohn.github.io/issues"
   },
-  "homepage": "https://github.com/ofrohn/d3-celestial"
+  "homepage": "https://github.com/ofrohn/ofrohn.github.io"
 }
