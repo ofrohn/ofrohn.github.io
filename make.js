@@ -21,6 +21,27 @@ sed('-i', 'style.css', 'celestial-style.css', 'celestial-viewer.html');
 cp('-f', '../d3-celestial/data/*', 'data');
 cp('-f', '../d3-celestial/lib/*', 'lib');
 
+echo('Copying asteroid-families');
+
+cp('-f', [
+  '../asteroid-families/asteroids.js', 
+  '../asteroid-families/asteroids.min.js', 
+  '../asteroid-families/asteroids.tar.gz',
+  '../asteroid-families/readme.md', 
+  '../asteroid-families/style.css',
+  '../asteroid-families/viewer.html'
+], './');
+
+mv('-f', 'readme.md', 'asteroids-readme.md');
+mv('-f', 'style.css', 'asteroids-style.css');
+mv('-f', 'viewer.html', 'asteroids-viewer.html');
+
+sed('-i', 'style.css', 'asteroids-style.css', 'asteroids-viewer.html');
+
+cp('-f', '../d3-orrery/data/*', 'data');
+cp('-f', '../d3-orrery/img/*', 'img');
+cp('-f', '../d3-orrery/lib/*', 'lib');
+
 echo('Copying d3-orrery');
 
 cp('-f', [
@@ -39,7 +60,6 @@ mv('-f', 'viewer.html', 'orrery-viewer.html');
 sed('-i', 'style.css', 'orrery-style.css', 'orrery-viewer.html');
 
 cp('-f', '../d3-orrery/data/*', 'data');
-cp('-f', '../d3-orrery/img/*', 'img');
-cp('-f', '../d3-orrery/lib/*', 'lib');
+
 
 echo('Done');
