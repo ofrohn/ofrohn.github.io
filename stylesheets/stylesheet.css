@@ -18,22 +18,31 @@ a {
 .btn {
   display: inline-block;
   margin-bottom: 0.5rem;
-  color: rgba(0, 0, 204, 0.7);
-  background-color: rgba(204, 204, 255, 0.48);
-  border-color: rgba(204, 204, 255, 0.7);
-  border-style: solid;
-  border-width: 1px;
+  color: rgba(204, 204, 204, 0.8);
+  background-color: rgba(204, 204, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 0.3rem;
   transition: color 0.2s, background-color 0.2s, border-color 0.2s; }
   .btn + .btn {
     margin-left: 1rem; }
 
 .btn:hover {
-  color: rgba(0, 0, 204, 0.8);
+  color: rgba(204, 204, 204, 1);
   text-decoration: none;
   background-color: rgba(204, 204, 255, 0.2);
-  border-color: rgba(204, 204, 255, 0.4); }
+  border-color: rgba(204, 204, 255, 1); }
 
+hgroup {
+  font-weight: bold;
+  padding: 18px;  
+  margin: 32px 0 0;
+}
+
+#d3c { background-image: url('bg-d3c.jpg'); }
+#d3o { background-image: url('bg-d3o.jpg'); }
+#d3a { background-image: url('bg-d3a.jpg'); }
+
+  
 @media screen and (min-width: 64em) {
   .btn {
     padding: 0.75rem 1rem; } }
@@ -54,23 +63,26 @@ a {
       margin-left: 0; } }
 
 .page-header {
-  color: #fff;
+  color: #000;
   text-align: center;
-  background-color: #000;
-  background-image: url('header.png'); }
+  background-color: #fff;
+  border-bottom: 3px solid #000;
+  padding: 0 0 6px;
+  /*background-image: url('header.png'); */}
 
+/*
 @media screen and (min-width: 64em) {
   .page-header {
-    padding: 5rem 6rem; } }
+    padding: 0.5rem 0.5rem; } }
 
 @media screen and (min-width: 42em) and (max-width: 64em) {
   .page-header {
-    padding: 3rem 4rem; } }
+    padding: 0.5rem 0.5rem; } }
 
 @media screen and (max-width: 42em) {
   .page-header {
-    padding: 2rem 1rem; } }
-
+    padding: 0.5rem 0.5rem; } }
+*/
 .project-name {
   margin-top: 0;
   margin-bottom: 0.1rem; }
@@ -104,20 +116,26 @@ a {
   .project-tagline {
     font-size: 1rem; } }
 
+.nav {
+  margin: 2px 4px 0 0;
+  display: block;
+  text-align: right;
+}
+    
 .main-content :first-child {
   margin-top: 0; }
 .main-content img {
   max-width: 100%; }
 .main-content h2, .main-content h3, .main-content h4, .main-content h5, .main-content h6 {
   margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  font-weight: normal;
-  color: #159957; }
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+  color: #f5f9e7; }
 .main-content h1 {
   margin-top: 1rem;
   margin-bottom: 0.5rem;
-  font-weight: normal;
-  color: #159957; }
+  font-weight: bold;
+  color: #f5f9d7; }
 .main-content p {
   margin-bottom: 1em; }
 .main-content code {
