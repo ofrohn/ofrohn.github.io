@@ -14,7 +14,8 @@ Celestial.display = function(config) {
   
   //Mash config with default settings
   cfg = settings.set(config); 
-  cfg.stars.size = cfg.stars.size || 7;  //Nothung works without starsize
+  cfg.stars.size = cfg.stars.size || 7;  // Nothing works without these
+  cfg.center = cfg.center || [0,0];      
   
   var parent = $(cfg.container);
   if (parent) { 
