@@ -6,6 +6,12 @@ Features display of stars and deep sky objects (DSOs) with a selectable magnitud
 
 Since it uses D3.js and HTML5 canvas, it needs a modern browser with canvas support, so any recent flavor of Chrome/Firefox/Safari/Opera or IE 9 and above should suffice. Check out the demo at <a href="http://armchairastronautics.blogspot.com/p/skymap.html">armchairastronautics.blogspot.com</a> or download the tarball `celestial.tar.gz` containing everything for local usage, which works with Firefox; Chrome needs to be started with command line parameter  `--allow-file-access-from-files` to load local json files. Or use a local web server environment, quite easy to do with node.js.
 
+__See some examples__:  
+[Interactive Form Demo](http://armchairastronautics.blogspot.com/p/skymap.html)  
+[Spinning Sky Globe](http://armchairastronautics.blogspot.com/2016/04/interactive-skymap-version-05.html)  
+[The Milky Way Halo, Globular Clusters & Satellite Galaxies](http://armchairastronautics.blogspot.com/p/milky-way-halo.html)  
+[The Local Group of Galaxies](http://armchairastronautics.blogspot.com/p/local-group.html)  
+
 ### Usage
 
 Include the necessary scripts d3.min.js, d3.geo.projection.min.js and celestial.js from the `lib` subfolder or the first two alternatively from the official d3.js server `http://d3js.org/`, and then simply edit the default options and display the map with `Celestial.display(config)`.
@@ -108,14 +114,14 @@ Celestial.display(config);
 __Supported projections:__ Airy, Aitoff, Armadillo, August, Azimuthal Equal Area, Azimuthal Equidistant, Baker, Berghaus, Boggs, Bonne, Bromley, Collignon, Craig, Craster, Cylindrical Equal Area, Cylindrical Stereographic, Eckert 1, Eckert 2, Eckert 3, Eckert 4, Eckert 5, Eckert 6, Eisenlohr, Equirectangular, Fahey, Foucaut, Ginzburg 4, Ginzburg 5, Ginzburg 6, Ginzburg 8, Ginzburg 9, Hammer, Hatano, HEALPix, Hill, Homolosine, Kavrayskiy 7, Lagrange, l'Arrivee, Laskowski, Loximuthal, Mercator, Miller, Mollweide, Flat Polar Parabolic, Flat Polar Quartic, Flat Polar Sinusoidal, Natural Earth, Nell Hammer, Orthographic, Patterson, Polyconic, Rectangular Polyconic, Robinson, Sinusoidal, Stereographic, Times, 2 Point Equidistant, van Der Grinten, van Der Grinten 2, van Der Grinten 3, van Der Grinten 4, Wagner 4, Wagner 6, Wagner 7, Wiechel and Winkel Tripel. Most of these need the extension [d3.geo.projections](https://github.com/d3/d3-geo-projection/)  
 
 __Style settings__   
-`fill`: fill color (css color value)  
+`fill`: fill color [(css color value)](https://developer.mozilla.org/en-US/docs/Web/CSS/color)  
 `opacity`: opacity (number 0..1)  
 _Line styles_  
-`stroke`: outline color (css color value)  
-`width`: line width (number 0..)  
+`stroke`: outline color [(css color value)](https://developer.mozilla.org/en-US/docs/Web/CSS/color)    
+`width`: line width in pixels (number 0..)  
 `dash`: line dash ([line length, gap length])  
 _Text styles_  
-`font`: well, the font (css font property)  
+`font`: well, the font [(css font property)](https://developer.mozilla.org/en-US/docs/Web/CSS/font)  
 `align`: horizontal align (left|center|right|start|end)  
 `baseline`: vertical align (alphabetic|top|hanging|middle|ideographic|bottom)  
 _Symbol style_  
