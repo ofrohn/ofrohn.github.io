@@ -9,6 +9,7 @@ cp('-f', [
   '../d3-celestial/celestial.tar.gz',
   '../d3-celestial/readme.md', 
   '../d3-celestial/style.css',
+  '../d3-celestial/dtpick.png',
   '../d3-celestial/viewer.html'
 ], './');
 
