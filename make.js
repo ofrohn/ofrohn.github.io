@@ -10,14 +10,17 @@ cp('-f', [
   '../d3-celestial/readme.md', 
   '../d3-celestial/style.css',
   '../d3-celestial/dtpick.png',
-  '../d3-celestial/viewer.html'
+  '../d3-celestial/viewer.html',
+  '../d3-celestial/sky.html'
 ], './');
 
 mv('-f', 'readme.md', 'celestial-readme.md');
-mv('-f', 'style.css', 'celestial-style.css');
+mv('-f', 'style.css', 'celestial.css');
 mv('-f', 'viewer.html', 'celestial-viewer.html');
+mv('-f', 'sky.html', 'celestial-sky.html');
 
-sed('-i', 'style.css', 'celestial-style.css', 'celestial-viewer.html');
+sed('-i', 'style.css', 'celestial.css', 'celestial-viewer.html');
+sed('-i', 'style.css', 'celestial.css', 'celestial-sky.html');
 
 cp('-f', '../d3-celestial/data/*', 'data');
 cp('-f', '../d3-celestial/lib/*', 'lib');
@@ -34,10 +37,10 @@ cp('-f', [
 ], './');
 
 mv('-f', 'readme.md', 'asteroids-readme.md');
-mv('-f', 'style.css', 'asteroids-style.css');
+mv('-f', 'style.css', 'asteroids.css');
 mv('-f', 'viewer.html', 'asteroids-viewer.html');
 
-sed('-i', 'style.css', 'asteroids-style.css', 'asteroids-viewer.html');
+sed('-i', 'style.css', 'asteroids.css', 'asteroids-viewer.html');
 
 cp('-f', '../d3-orrery/data/*', 'data');
 cp('-f', '../d3-orrery/img/*', 'img');
@@ -55,10 +58,10 @@ cp('-f', [
 ], './');
 
 mv('-f', 'readme.md', 'orrery-readme.md');
-mv('-f', 'style.css', 'orrery-style.css');
+mv('-f', 'style.css', 'orrery.css');
 mv('-f', 'viewer.html', 'orrery-viewer.html');
 
-sed('-i', 'style.css', 'orrery-style.css', 'orrery-viewer.html');
+sed('-i', 'style.css', 'orrery.css', 'orrery-viewer.html');
 
 cp('-f', '../d3-orrery/data/*', 'data');
 
