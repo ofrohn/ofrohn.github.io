@@ -8,19 +8,15 @@ cp('-f', [
   '../d3-celestial/celestial.min.js', 
   '../d3-celestial/celestial.tar.gz',
   '../d3-celestial/readme.md', 
-  '../d3-celestial/style.css',
+  '../d3-celestial/celestial.css',
   '../d3-celestial/dtpick.png',
   '../d3-celestial/viewer.html',
   '../d3-celestial/sky.html'
 ], './');
 
 mv('-f', 'readme.md', 'celestial-readme.md');
-mv('-f', 'style.css', 'celestial.css');
 mv('-f', 'viewer.html', 'celestial-viewer.html');
 mv('-f', 'sky.html', 'celestial-sky.html');
-
-sed('-i', 'style.css', 'celestial.css', 'celestial-viewer.html');
-sed('-i', 'style.css', 'celestial.css', 'celestial-sky.html');
 
 cp('-f', '../d3-celestial/data/*', 'data');
 cp('-f', '../d3-celestial/lib/*', 'lib');
