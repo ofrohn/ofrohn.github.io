@@ -32,6 +32,8 @@ var config = {
   interactive: true,  // Enable zooming and rotation with mousewheel and dragging
   form: true,         // Display form for interactive settings
   location: false,    // Display location settings (no center setting on form)
+  horizon: { show: true, fill: "#000", opacity: 0.6 },  //Show horizon marker, if location
+                      // is set and map projection shows 360?  
   controls: true,     // Display zoom controls
   container: "map",   // ID of parent element, e.g. div, null = html-body
   datapath: "data/",  // Path/URL to data files, empty = subfolder 'data'
@@ -114,7 +116,7 @@ var config = {
 Celestial.display(config);
 ```
 
-__Supported projections:__ Airy, Aitoff, Armadillo, August, Azimuthal Equal Area, Azimuthal Equidistant, Baker, Berghaus, Boggs, Bonne, Bromley, Collignon, Craig, Craster, Cylindrical Equal Area, Cylindrical Stereographic, Eckert 1, Eckert 2, Eckert 3, Eckert 4, Eckert 5, Eckert 6, Eisenlohr, Equirectangular, Fahey, Foucaut, Ginzburg 4, Ginzburg 5, Ginzburg 6, Ginzburg 8, Ginzburg 9, Hammer, Hatano, HEALPix, Hill, Homolosine, Kavrayskiy 7, Lagrange, l'Arrivee, Laskowski, Loximuthal, Mercator, Miller, Mollweide, Flat Polar Parabolic, Flat Polar Quartic, Flat Polar Sinusoidal, Natural Earth, Nell Hammer, Orthographic, Patterson, Polyconic, Rectangular Polyconic, Robinson, Sinusoidal, Stereographic, Times, 2 Point Equidistant, van Der Grinten, van Der Grinten 2, van Der Grinten 3, van Der Grinten 4, Wagner 4, Wagner 6, Wagner 7, Wiechel and Winkel Tripel. Most of these need the extension [d3.geo.projections](https://github.com/d3/d3-geo-projection/)  
+__Supported projections:__ Airy, Aitoff, Armadillo, August, Azimuthal Equal Area, Azimuthal Equidistant, Baker, Berghaus, Boggs, Bonne, Bromley, Collignon, Craig, Craster, Cylindrical Equal Area, Cylindrical Stereographic, Eckert 1, Eckert 2, Eckert 3, Eckert 4, Eckert 5, Eckert 6, Eisenlohr, Equirectangular, Fahey, Foucaut, Ginzburg 4, Ginzburg 5, Ginzburg 6, Ginzburg 8, Ginzburg 9, Hammer, Hatano, HEALPix, Hill, Homolosine, Kavrayskiy 7, Lagrange, l'Arrivee, Laskowski, Loximuthal, Mercator, Miller, Mollweide, Flat Polar Parabolic, Flat Polar Quartic, Flat Polar Sinusoidal, Natural Earth, Nell Hammer, Orthographic, Patterson, Polyconic, Rectangular Polyconic, Robinson, Sinusoidal, Stereographic, Times, 2 Point Equidistant, van der Grinten, van der Grinten 2, van der Grinten 3, van der Grinten 4, Wagner 4, Wagner 6, Wagner 7, Wiechel and Winkel Tripel. Most of these need the extension [d3.geo.projections](https://github.com/d3/d3-geo-projection/)  
 
 __Style settings__   
 `fill`: fill color [(css color value)](https://developer.mozilla.org/en-US/docs/Web/CSS/color)  
@@ -134,37 +136,46 @@ _Symbol style_
 
 __Exposed functions & objects__  
 * `Celestial.add({file:string, type:dso|line, callback:function, redraw:function)`  
-   Function to add data in json-format (dso) or directly (line) to the display
-   _file_: complete url/path to json data file (type:dso)
-   _type_: type of data being added
-   _callback_: callback function to call when json is loaded (dso)
-               or to directly add elements to the path (line)
-   _redraw_: for interactive display, call when view changes (optional) 
+   Function to add data in json-format (dso) or directly (line) to the display  
+   _file_: complete url/path to json data file (type:dso)  
+   _type_: type of data being added  
+   _callback_: callback function to call when json is loaded (dso)  
+               or to directly add elements to the path (line)  
+   _redraw_: for interactive display, call when view changes (optional)  
 
+* `Celestial.getData(geojson, transform)`  
+   Function to convert geojson coordinates to transformation  
+   (equatorial, ecliptic, galactic, supergalactic)  
+   Returns geojson-object with transformed coordinates  
+   
+* `Celestial.getPoint(coordinates, transform)`  
+   Function to convert single coordinate to transformation  
+   (equatorial, ecliptic, galactic, supergalactic)  
+   Returns transformed coordinates  
    
 * `Celestial.container`  
-   The object to add data to in the callback. See D3.js documentation 
+   The object to add data to in the callback. See D3.js documentation  
 
 * `Celestial.context` 
-   The HTML5-canvas context object to draw on in the callback. Also see D3.js documentation 
+   The HTML5-canvas context object to draw on in the callback. Also see D3.js documentation  
   
 * `Celestial.map`  
-   The d3.geo.path object to apply projection to data. Also see D3.js documentation
+   The d3.geo.path object to apply projection to data. Also see D3.js documentation  
   
 * `Celestial.mapProjection`  
-   The projection object for access to its properties and functions. Also D3.js documentation
+   The projection object for access to its properties and functions. Also D3.js documentation  
 
 * `Celestial.clip(coordinates)`  
    Function to check if the object is visible, and set its visiblility  
-   _coordinates_: object coordinates in radians, normally supplied by D3 as geometry.coordinates array
+   _coordinates_: object coordinates in radians, normally supplied by D3 as geometry.coordinates array  
 
-* `Celestial.setStyle(<style object>)`
-* `Celestial.setTextStyle(<style object>)`
-   Set the canvas styles as documented above under __style settings__. Seperate functions for graphic/text
-   _&lt;style object>_: object literal listing all styles to set
+* `Celestial.setStyle(<style object>)`  
+* `Celestial.setTextStyle(<style object>)`  
+   Set the canvas styles as documented above under __style settings__. Seperate functions for graphic/text  
+   _&lt;style object>_: object literal listing all styles to set  
 
 * `Celestial.Canvas.symbol()`  
-   Draw symbol shapes directly on canvas context: circle, square, diamond, triangle, ellipse, marker,
+   Draw symbol shapes directly on canvas context: circle, square, diamond, triangle, ellipse, marker,  
    stroke-circle, cross-circle
    
 ### Manipulating the Map

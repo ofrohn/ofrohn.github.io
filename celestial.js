@@ -76,9 +76,9 @@ Celestial.display = function(config) {
     container.append("path").datum(circle).attr("class", "outline"); 
   } else {
     container.append("path").datum(graticule.outline).attr("class", "outline"); 
-    /*if (cfg.location && cfg.daylight.show) {
-      container.append("path").datum(circle).attr("class", "daylight");
-    }*/
+    if (cfg.location && cfg.horizon.show) {
+      container.append("path").datum(circle).attr("class", "horizon");
+    }
   }
 
   //Celestial planes
@@ -190,7 +190,14 @@ Celestial.display = function(config) {
     d3.select(par).append("input").attr("type", "button").attr("id", "celestial-zoomout").attr("value", "\u2212").on("click", function() { zoomBy(0.9); });
   }
   
-  if (cfg.location === true && $("loc") === null) geo(cfg);
+  if (cfg.location === true) {
+    if ($("loc") === null) geo(cfg);
+    //set coords
+    var hs = $("horizon-show");
+    if (hs) hs.style.display = proj.clip === true ? "none" : "inline-block";
+    hs.previousSibling.style.display = hs.style.display;
+    projection.rotate({center:Celestial.zenith()});
+  }
   if (cfg.form === true && $("params") === null) form(cfg);
   if ($("error") === null) d3.select("body").append("div").attr("id", "error");
 
@@ -330,18 +337,18 @@ Celestial.display = function(config) {
       });
     }
     
-    /*if (cfg.location && cfg.daylight.show && !proj.clip) {
-      circle.origin(transformDeg(cfg.center, euler[trans]));
-
-      setStyle(cfg.daylight);
-      container.selectAll(".daylight").datum(circle).attr("d", map);  
-      context.fill();    
-    }*/
     
     setStyle(cfg.background);
     container.selectAll(".outline").attr("d", outline);      
     context.stroke();
     
+    if (cfg.location && cfg.horizon.show && !proj.clip) {
+      circle.origin(Celestial.nadir());
+      setStyle(cfg.horizon);
+      container.selectAll(".horizon").datum(circle).attr("d", map);  
+      context.fill();    
+    }
+
     if (cfg.controls) { 
       zoomState(projection.scale());
     }
@@ -469,8 +476,8 @@ Celestial.display = function(config) {
   this.redraw = redraw; 
   this.resize = function() { resize(); }; 
   this.apply = function(config) { apply(config); }; 
-  this.rotate = function(config) { if (!config) return cfg.center; rotate(config); }; 
-  this.zoomBy = function(factor) { if (!factor) return cfg.center; zoomBy(factor); };
+  this.rotate = function(config) { if (!config) return projection.rotate(); rotate(config); }; 
+  this.zoomBy = function(factor) { if (!factor) return projection.scale(); zoomBy(factor); };
 };
 
 
@@ -762,7 +769,8 @@ var settings = {
   interactive: true,  // Enable zooming and rotation with mousewheel and dragging
   form: false,        // Display settings form
   location: false,    // Display location settings 
-  daylight: { show: true, fill: "#fff", opacity: 0.4 },  // Show daylight marker 
+  horizon: { show: true, fill: "#000", opacity: 0.6 },  //Show horizon marker 
+  daylight: { show: false, fill: "#fff", opacity: 0.4 }, //Show daylight marker 
   fullwidth: false,   // Display fullwidth button
   controls: true,     // Display zoom controls
   container: "celestial-map",   // ID of parent element, e.g. div
@@ -879,7 +887,7 @@ var projections = {
   "baker": {n:"Baker Dinomic", arg:null, scale:160, ratio:1.4},
   "berghaus": {n:"Berghaus Star", arg:0, scale:320, ratio:1.0, clip:true},
   "boggs": {n:"Boggs Eumorphic", arg:null, scale:170},
-  "bonne": {n:"Bonne", arg:Math.PI/5, scale:230, ratio:0.88},
+  "bonne": {n:"Bonne", arg:Math.PI/5, scale:225, ratio:0.88},
   "bromley": {n:"Bromley", arg:null, scale:162},
   "collignon": {n:"Collignon", arg:null, scale:100, ratio:2.6},
   "craig": {n:"Craig Retroazimuthal", arg:-0.1, scale:310, ratio:1.5, clip:true},
@@ -909,7 +917,7 @@ var projections = {
   "hatano": {n:"Hatano", arg:null, scale:186},
   "healpix": {n:"HEALPix", arg:1, scale:320, ratio:1.2},
   "hill": {n:"Hill Eucyclic", arg:2, scale:190, ratio:1.1},
-  "kavrayskiy VII": {n:"Kavrayskiy 7", arg:null, scale:185, ratio:1.75},
+  "kavrayskiy7": {n:"Kavrayskiy VII", arg:null, scale:185, ratio:1.75},
   "lagrange": {n:"Lagrange", arg:Math.PI/4, scale:88, ratio:1.6, clip:false},
   "larrivee": {n:"l'Arrivée", arg:null, scale:160, ratio:1.25},
   "laskowski": {n:"Laskowski Tri-Optimal", arg:null, scale:165, ratio:1.7},
@@ -1191,6 +1199,14 @@ function findPos(o) {
   return [l, t];
 }
 
+function hasParent(t, id){
+  while(t.parentNode){
+    if(t.id === id) return true;
+    t = t.parentNode;
+  }
+  return false;
+}
+
 function attach(node, event, func) {
   if (node.addEventListener) node.addEventListener(event, func, false);
   else node.attachEvent("on" + event, func); 
@@ -1257,7 +1273,7 @@ function form(cfg) {
      .attr("value", function (d) { return d.o; })
      .text(function (d) { return d.n; });
   sel.property("selectedIndex", selected);
-  if (!cfg.location) {
+  //if (!cfg.location) {
     col.append("br");
     col.append("label").attr("title", "Center coordinates long/lat in selected coordinate space").attr("for", "centerx").html("Center");
     col.append("input").attr("type", "number").attr("id", "centerx").attr("title", "Center right ascension/longitude").attr("max", "24").attr("min", "0").attr("step", "0.1").on("change", turn);
@@ -1272,7 +1288,7 @@ function form(cfg) {
 
     col.append("label").attr("for", "orientationfixed").html("Fixed");
     col.append("input").attr("type", "checkbox").attr("id", "orientationfixed").property("checked", cfg.orientationfixed).on("change", apply);    
-  }
+  //}
   if (cfg.fullwidth)
     col.append("input").attr("type", "button").attr("id", "fullwidth").attr("value", "\u25c4 Make Full Width \u25ba").on("click", function() {
     $("sidebar-wrapper").style.display = "none";
@@ -1282,7 +1298,7 @@ function form(cfg) {
     Celestial.display(cfg);
     return false;
   });
-  col.append("input").attr("type", "button").attr("id", "show").attr("value", "Show");
+  //col.append("input").attr("type", "button").attr("id", "show").attr("value", "Show");
   //col.append("input").attr("type", "button").attr("id", "defaults").attr("value", "Defaults");
 
   setCenter(cfg.center, cfg.transform);
@@ -1388,7 +1404,7 @@ function form(cfg) {
   col.append("label").attr("title", "Star/DSO sizes are increased with higher zoom-levels").attr("for", "adaptable").html("Adaptable sizes");
   col.append("input").attr("type", "checkbox").attr("id", "adaptable").property("checked", cfg.adaptable).on("change", apply);
    
-  $("show").onclick = function(e) {
+  /*$("show").onclick = function(e) {
     var x = $("centerx"),
         y = $("centery");
     //Test params
@@ -1404,7 +1420,7 @@ function form(cfg) {
     Celestial.display(cfg);
 
     return false;
-  };
+  };*/
 
   setLimits();
   setUnit(cfg.transform);
@@ -1646,9 +1662,11 @@ function setLimits() {
 }
 
 
+var zenith = [0,0];
+
 function geo(cfg) {
   var ctrl = d3.select("#celestial-form").append("div").attr("id", "loc"),
-      dt = new Date(), geopos = [0,0],
+      dt = new Date(), geopos = [0,0], 
       dtFormat = d3.time.format("%Y-%m-%d %H:%M:%S"),
       zone = dt.getTimezoneOffset();
 
@@ -1659,28 +1677,31 @@ function geo(cfg) {
   });
   
   var col = ctrl.append("div").attr("class", "col");
-
+  //Latitude & longitude fields
   col.append("label").attr("title", "Location coordinates long/lat").attr("for", "lat").html("Location");
   col.append("input").attr("type", "number").attr("id", "lat").attr("title", "Latitude").attr("placeholder", "Latitude").attr("max", "90").attr("min", "-90").attr("step", "0.0001").attr("value", geopos[0]).on("change",  function() { if (testNumber(this) === true) go(); });
   col.append("span").html("\u00b0");
-  
   col.append("input").attr("type", "number").attr("id", "lon").attr("title", "Longitude").attr("placeholder", "Longitude").attr("max", "180").attr("min", "-180").attr("step", "0.0001").attr("value", geopos[1]).on("change",  function() { if (testNumber(this) === true) go(); });
   col.append("span").html("\u00b0");
-
+  //Here-button if supported
   if ("geolocation" in navigator) {
     col.append("input").attr("type", "button").attr("value", "Here").attr("id", "here").on("click", here);
   }
-  
-  col.append("label").attr("title", "Local date/time").attr("for", "datetime").html(" Local date/time");
+  //Datetime field with dtpicker-button
+  col.append("label").attr("title", "Local date/time").attr("for", "datetime").html(" Date/time");
   col.append("input").attr("type", "text").attr("id", "datetime").attr("title", "Date and time").attr("value", dateFormat(dt, zone))
   .on("click", showpick, true).on("input", function() { 
     this.value = dateFormat(dt, zone); 
     if (!dtpick.isVisible()) showpick(); 
   });
   col.append("div").attr("id", "datepick").on("click", showpick);
-  
+  //Now -button sets current time & date of device  
   col.append("input").attr("type", "button").attr("value", "Now").attr("id", "now").on("click", now);
-    
+  //Horizon marker
+  col.append("br");
+  col.append("label").attr("title", "Show horizon marker").attr("for", "horizon-show").html(" Horizon marker");
+  col.append("input").attr("type", "checkbox").attr("id", "horizon-show").property("checked", cfg.horizon.show).on("change", go);    
+  
   d3.select(document).on("mousedown", function() { 
     if (!hasParent(d3.event.target, "celestial-date") && dtpick.isVisible()) dtpick.hide(); 
   });
@@ -1717,34 +1738,36 @@ function geo(cfg) {
   }  
   
   function go() {
-    var zenith = [0,0],
-        lon = $("lon").value,
-        lat = $("lat").value; 
+    var lon = $("lon").value,
+        lat = $("lat").value,
+        dm = !!$("horizon-show").checked; 
 
     dt = dtFormat.parse($("datetime").value.slice(0,-6));
 
     var tz = dt.getTimezoneOffset();
     var dtc = new Date(dt.valueOf() + (zone - tz) * 60000);
 
+    cfg.horizon.show = dm;
+    
     if (lon !== "" && lat !== "") {
       geopos = [parseFloat(lat), parseFloat(lon)];
-      zenith = horizontal.inverse(dtc, [90, 0], geopos);
-      //zenith[2]
-      Celestial.rotate({center:zenith});
+      zenith = Celestial.getPoint(horizontal.inverse(dtc, [90, 0], geopos), cfg.transform);
+      zenith[2] = 0;
+      Celestial.rotate({center:zenith, horizon:cfg.horizon});
     }
   }
 
-  function hasParent(t, id){
-    while(t.parentNode){
-      if(t.id === id) return true;
-      t = t.parentNode;
-    }
-    return false;
-  }
   
-  setTimeout(go, 1000);  
+  setTimeout(go, 1000); 
 }
 
+Celestial.zenith = function() { return zenith; };
+Celestial.nadir = function() {
+  var b = -zenith[1],
+      l = zenith[0] + 180;
+  if (l > 180) l -= 360;    
+  return [l, b-0.001]; 
+};
 
 
 var datetimepicker = function(callback) {
