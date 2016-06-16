@@ -1364,7 +1364,9 @@ function dateDiff(dt1, dt2, type) {
 
 
 //display settings form in div with id "celestial-form"
-function form(config) {
+function form(cfg) {
+  var config = settings.set(cfg); 
+
   var prj = Celestial.projections(), leo = Celestial.eulerAngles();
   var ctrl = d3.select("#celestial-form").append("div").attr("class", "ctrl");
   var frm = ctrl.append("form").attr("id", "params").attr("name", "params").attr("method", "get").attr("action" ,"#");
