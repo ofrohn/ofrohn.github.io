@@ -248,7 +248,6 @@ Celestial.display = function(config) {
     
     //scale = prj.scale * width/1024;
     var prjTo = Celestial.projection(config.projection).center(ctr).translate([width/2, width/prj.ratio/2]).scale([prj.scale * width/1024]);
-    cfg.projection = config.projection;
     var bAdapt = cfg.adaptable;
     cfg.adaptable = false;
 
@@ -277,6 +276,7 @@ Celestial.display = function(config) {
         scale = proj.scale * width/1024;
         canvas.attr("width", width).attr("height", height);
         if (parent) parent.style.height = px(height);
+        cfg.projection = config.projection;
         prjMap = Celestial.projection(config.projection).rotate(rot).translate([width/2, height/2]).scale([scale]);
         prjOutline = Celestial.projection(config.projection).translate([width/2, height/2]).scale([scale]);
         map.projection(prjMap);
