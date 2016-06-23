@@ -1,12 +1,12 @@
 // Copyright 2015 Olaf Frohn https://github.com/ofrohn, see LICENSE
 !(function() {
 var Celestial = {
-  version: '0.5.6',
+  version: '0.5.7',
   container: null,
   data: []
 };
  
-var cfg, prjMap, prjOutline, zoom, map, outline, circle, interval;
+var cfg, prjMap, zoom, map, circle;
 
 // Show it all, with the given config, otherwise with default settings
 Celestial.display = function(config) {
@@ -41,15 +41,13 @@ Celestial.display = function(config) {
       exp = -0.28, //Object size base & exponent
       adapt = 1,
       rotation = getAngles(cfg.center),
-      //center = [-rotation[0], -rotation[1]],
       path = cfg.datapath || "";
       path = path.replace(/([^\/]$)/, "$1\/");
   
       
   if (par != "body") $(cfg.container).style.height = px(height);
   
-  prjMap = Celestial.projection(cfg.projection).rotate(rotation).translate([width/2, height/2]).scale([scale]);
-  prjOutline = Celestial.projection(cfg.projection).translate([width/2, height/2]).scale([scale]); //projected non moving outline
+  prjMap = Celestial.projection(cfg.projection).rotate(rotation).translate([width/2, height/2]).scale(scale);
     
   zoom = d3.geo.zoom().projection(prjMap).center([width/2, height/2]).scaleExtent([scale, scale*5]).on("zoom.redraw", redraw);
 
@@ -61,7 +59,6 @@ Celestial.display = function(config) {
   var graticule = d3.geo.graticule().minorStep([15,10]);
   
   map = d3.geo.path().projection(prjMap).context(context);
-  outline = d3.geo.path().projection(prjOutline).context(context);
    
   //parent div with id #celestial-map or body
   if (container) container.selectAll("*").remove();
@@ -75,8 +72,8 @@ Celestial.display = function(config) {
   d3.select(window).on('resize', resize);
 
   if (cfg.controls === true && $("celestial-zoomin") === null) {
-    d3.select(par).append("input").attr("type", "button").attr("id", "celestial-zoomin").attr("value", "\u002b").on("click", function() { zoomBy(1.111); });
-    d3.select(par).append("input").attr("type", "button").attr("id", "celestial-zoomout").attr("value", "\u2212").on("click", function() { zoomBy(0.9); });
+    d3.select(par).append("input").attr("type", "button").attr("id", "celestial-zoomin").attr("value", "\u002b").on("click", function() { zoomBy(1.057); });
+    d3.select(par).append("input").attr("type", "button").attr("id", "celestial-zoomout").attr("value", "\u2212").on("click", function() { zoomBy(0.946); });
   }
   
   if (cfg.location === true) {
@@ -201,8 +198,8 @@ Celestial.display = function(config) {
         ext = zoom.scaleExtent();
     if (scale < ext[0]) scale = ext[0];
     if (scale > ext[1]) scale = ext[1];
-    prjMap.scale([scale]); 
-    zoom.scale([scale]); 
+    prjMap.scale(scale); 
+    zoom.scale(scale); 
     redraw(); 
   }  
   
@@ -213,13 +210,29 @@ Celestial.display = function(config) {
 
 
   function rotate(config) {
+    var cFrom = cfg.center, 
+        rot = prjMap.rotate(),
+        interval = 1500,
+        keep = false;
+    if (Round(rot[1], 2) === -Round(config.center[1], 2)) keep = true; //keep lat fixed if equal
     cfg = cfg.set(config);
-     //d3.geo.interpolate()
-    var rot = prjMap.rotate();
-    rotation = getAngles(cfg.center);
-    if (rotation[2] === "" || rotation[2] === undefined) rotation[2] = rot[2];
-    prjMap.rotate(rotation);
-    redraw();
+    var d = d3.geo.distance(cFrom, cfg.center);
+    if (d < 0.035) {  //~2deg
+      rotation = getAngles(cfg.center);
+      prjMap.rotate(rotation);
+      redraw();
+    } else {
+      var cTween = d3.geo.interpolate(cFrom, cfg.center);
+      interval *= d;
+      d3.select({}).transition().duration(interval).tween("center", function() {
+        return function(_) {
+          var c = getAngles(cTween(_));
+          if (keep) c[1] = rot[1]; 
+          prjMap.rotate(c);
+          redraw();
+        };
+      });        
+    }
   }
   
   function resize(set) {
@@ -228,9 +241,8 @@ Celestial.display = function(config) {
     height = width/ratio;
     scale = proj.scale * width/1024;
     canvas.attr("width", width).attr("height", height);
-    zoom.scaleExtent([scale, scale*5]).scale([scale]);
-    prjMap.translate([width/2, height/2]).scale([scale]);
-    prjOutline.translate([width/2, height/2]);
+    zoom.scaleExtent([scale, scale*5]).scale(scale);
+    prjMap.translate([width/2, height/2]).scale(scale);
     if (parent) parent.style.height = px(height);
     redraw();
   }
@@ -246,7 +258,6 @@ Celestial.display = function(config) {
 
     if (proj.clip != prj.clip) interval = 0;   // Different clip = no transition
     
-    //scale = prj.scale * width/1024;
     var prjTo = Celestial.projection(config.projection).center(ctr).translate([width/2, width/prj.ratio/2]).scale([prj.scale * width/1024]);
     var bAdapt = cfg.adaptable;
     cfg.adaptable = false;
@@ -254,14 +265,11 @@ Celestial.display = function(config) {
     showHorizon(prj.clip);
     
     prjMap = projectionTween(prjFrom, prjTo);
-    prjOutline = projectionTween(prjFrom, prjTo);
 
     d3.select({}).transition().duration(interval).tween("projection", function() {
         return function(_) {
           prjMap.alpha(_).rotate(rot);
-          prjOutline.alpha(_);
           map.projection(prjMap);
-          outline.projection(prjOutline);
           setClip(prj.clip);
           ratio = rTween(_);
           height = width/ratio;
@@ -277,12 +285,10 @@ Celestial.display = function(config) {
         canvas.attr("width", width).attr("height", height);
         if (parent) parent.style.height = px(height);
         cfg.projection = config.projection;
-        prjMap = Celestial.projection(config.projection).rotate(rot).translate([width/2, height/2]).scale([scale]);
-        prjOutline = Celestial.projection(config.projection).translate([width/2, height/2]).scale([scale]);
+        prjMap = Celestial.projection(config.projection).rotate(rot).translate([width/2, height/2]).scale(scale);
         map.projection(prjMap);
-        outline.projection(prjOutline);
         setClip(proj.clip); 
-        zoom.projection(prjMap).scaleExtent([scale, scale*5]);
+        zoom.projection(prjMap).scaleExtent([scale, scale*5]).scale(scale);
         cfg.adaptable = bAdapt;
         redraw();
       });
@@ -291,7 +297,6 @@ Celestial.display = function(config) {
   
   function redraw() {  
     var rot = prjMap.rotate();
-    prjOutline.scale(prjMap.scale());
     
     if (cfg.adaptable) adapt = Math.sqrt(prjMap.scale()/scale);
     if (cfg.orientationfixed) {
@@ -304,9 +309,7 @@ Celestial.display = function(config) {
     setCenter(cfg.center, cfg.transform);
     clear();
     
-    setStyle(cfg.background);
-    container.selectAll(".outline").attr("d", outline);      
-    context.fill();
+    drawOutline();
     
     //Draw all types of objects on the canvas
     if (cfg.mw.show) { 
@@ -385,10 +388,7 @@ Celestial.display = function(config) {
       });
     }
     
-    
-    setStyle(cfg.background);
-    container.selectAll(".outline").attr("d", outline);      
-    context.stroke();
+    drawOutline(true);
     
     if (cfg.location && cfg.horizon.show && !proj.clip) {
       circle.origin(Celestial.nadir());
@@ -403,6 +403,15 @@ Celestial.display = function(config) {
     }
   }
     
+  function drawOutline(stroke) {
+    var rot = prjMap.rotate();
+    
+    prjMap.rotate([0,0]);
+    setStyle(cfg.background);
+    container.selectAll(".outline").attr("d", map);
+    if (stroke) context.stroke(); else context.fill();
+    prjMap.rotate(rot);
+  }
 
   // Helper functions -------------------------------------------------
   
@@ -415,7 +424,7 @@ Celestial.display = function(config) {
     context.strokeStyle = s.stroke || null;
     context.lineWidth = s.width || null;
     context.globalAlpha = s.opacity || 1;  
-    context.font = s.font;
+    context.font = s.font || null;
     if (has(s, "dash")) context.setLineDash(s.dash); else context.setLineDash([]);
     context.beginPath();
   }
@@ -514,7 +523,6 @@ Celestial.display = function(config) {
   
   function getWidth() {
     if (cfg.width && cfg.width > 0) return cfg.width;
-    //if (parent && parent.style.width !== "" && parent.style.width !== "100%") return parent.clientWidth - margin[0];
     if (parent) return parent.clientWidth - margin[0];
     return window.innerWidth - margin[0]*2;
   }
@@ -522,16 +530,14 @@ Celestial.display = function(config) {
   function getProjection(p) {
     if (!has(projections, p)) return;
     var res = projections[p];
-    if (!has(res, "ratio")) res.ratio = 2;  // Default w/h ratio 2:1
-    //res.scale *= width/1024; // Projection dependent scale prop. to width
-    
+    if (!has(res, "ratio")) res.ratio = 2;  // Default w/h ratio 2:1    
     return res;
   }
   
   function getAngles(coords) {
     if (coords === null) return [0,0,0];
     var rot = eulerAngles.equatorial; 
-    
+    if (!coords[2]) coords[2] = 0;
     return [rot[0] - coords[0], rot[1] - coords[1], rot[2] + coords[2]];
   }
   
@@ -999,9 +1005,9 @@ var bvcolor =
  
 /* Default parameters for each supported projection
      arg: constructor argument, if any 
-     scale: scale parameter so that they all have ~equal width
-     ratio: width/height ration, 2.0 if none
-     clip: projection clipped to 90 degrees from center
+     scale: scale parameter so that they all have ~equal width, normalized to 1024 pixels
+     ratio: width/height ratio, 2.0 if none
+     clip: projection clipped to 90 degrees from center, otherwise to antimeridian
 */
 var projections = {
   "airy": {n:"Airy’s Minimum Error", arg:Math.PI/2, scale:360, ratio:1.0, clip:true},
@@ -1303,7 +1309,7 @@ canvas.text = function() {
 
 function $(id) { return document.getElementById(id); }
 function px(n) { return n + "px"; } 
-//function Round(x, dg) { return(Math.round(Math.pow(10,dg)*x)/Math.pow(10,dg)); }
+function Round(x, dg) { return(Math.round(Math.pow(10,dg)*x)/Math.pow(10,dg)); }
 function sign(x) { return x ? x < 0 ? -1 : 1 : 0; }
 function pad(n) { return n < 10 ? '0' + n : n; }
 
