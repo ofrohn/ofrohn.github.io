@@ -1,7 +1,7 @@
 // Copyright 2015 Olaf Frohn https://github.com/ofrohn, see LICENSE
 !(function() {
 var Celestial = {
-  version: '0.5.8',
+  version: '0.5.9',
   container: null,
   data: []
 };
@@ -16,7 +16,8 @@ var cfg, prjMap, zoom, map, circle;
 
 // Show it all, with the given config, otherwise with default settings
 Celestial.display = function(config) {
-  var par, container = Celestial.container;
+  var par, container = Celestial.container,
+      animations = [], current = 0, repeat = false, aID;
   
   //Mash config with default settings
   cfg = settings.set(config); 
@@ -43,7 +44,8 @@ Celestial.display = function(config) {
       ratio = proj.ratio,
       height = width / ratio,
       scale = proj.scale * width/1024,
-      base = cfg.stars.size, 
+      starbase = cfg.stars.size, 
+      dsobase = cfg.dsos.size || starbase,
       exp = -0.28, //Object size base & exponent
       adapt = 1,
       rotation = getAngles(cfg.center),
@@ -219,6 +221,7 @@ Celestial.display = function(config) {
       zoom.scale(sc1); 
       redraw(); 
     });
+    return interval;
   }  
   
   function apply(config) {
@@ -236,7 +239,7 @@ Celestial.display = function(config) {
         cTween, zTween, oTween,
         oof = cfg.orientationfixed;
     
-    if (Round(rot[1], 2) === -Round(config.center[1], 2)) keep = true; //keep lat fixed if equal
+    if (Round(rot[1], 1) === -Round(config.center[1], 1)) keep = true; //keep lat fixed if equal
     cfg = cfg.set(config);
     var d = Round(d3.geo.distance(cFrom, cfg.center), 2);
     var o = d3.geo.distance([cFrom[2],0], [cfg.center[2],0]);
@@ -269,9 +272,12 @@ Celestial.display = function(config) {
         };
       }).transition().duration(0).tween("center", function() {
         cfg.orientationfixed = oof;
+        rotation = getAngles(cfg.center);
+        prjMap.rotate(rotation);
         redraw();
       });
     }
+    return interval;
   }
   
   function resize(set) {
@@ -290,47 +296,55 @@ Celestial.display = function(config) {
     var prj = getProjection(config.projection);
     if (!prj) return;
     
-    var rot = prjMap.rotate(), ctr = prjMap.center(),
-        prjFrom = Celestial.projection(cfg.projection).center(ctr).translate([width/2, height/2]).scale([scale]),
-        interval = ANIMINTERVAL_P,
+    var rot = prjMap.rotate(), ctr = prjMap.center(), sc = prjMap.scale(), ext = zoom.scaleExtent(),
+        prjFrom = Celestial.projection(cfg.projection).center(ctr).translate([width/2, height/2]).scale([ext[0]]),
+        interval = ANIMINTERVAL_P, 
+        delay = 0, 
         rTween = d3.interpolateNumber(ratio, prj.ratio);
 
     if (proj.clip != prj.clip) interval = 0;   // Different clip = no transition
     
     var prjTo = Celestial.projection(config.projection).center(ctr).translate([width/2, width/prj.ratio/2]).scale([prj.scale * width/1024]);
     var bAdapt = cfg.adaptable;
-    cfg.adaptable = false;
 
+    if (sc > ext[0]) {
+      delay = zoomBy(0.1);
+      setTimeout(reproject, delay, config);
+      return delay + interval;
+    }
+    
     showHorizon(prj.clip);
     
     prjMap = projectionTween(prjFrom, prjTo);
+    cfg.adaptable = false;
 
     d3.select({}).transition().duration(interval).tween("projection", function() {
-        return function(_) {
-          prjMap.alpha(_).rotate(rot);
-          map.projection(prjMap);
-          setClip(prj.clip);
-          ratio = rTween(_);
-          height = width/ratio;
-          canvas.attr("width", width).attr("height", height);
-          if (parent) parent.style.height = px(height);
-          redraw();
-        };
-      }).transition().duration(0).tween("projection", function() {
-        proj = prj;
-        ratio = proj.ratio;
-        height = width / proj.ratio;
-        scale = proj.scale * width/1024;
+      return function(_) {
+        prjMap.alpha(_).rotate(rot);
+        map.projection(prjMap);
+        setClip(prj.clip);
+        ratio = rTween(_);
+        height = width/ratio;
         canvas.attr("width", width).attr("height", height);
         if (parent) parent.style.height = px(height);
-        cfg.projection = config.projection;
-        prjMap = Celestial.projection(config.projection).rotate(rot).translate([width/2, height/2]).scale(scale);
-        map.projection(prjMap);
-        setClip(proj.clip); 
-        zoom.projection(prjMap).scaleExtent([scale, scale*5]).scale(scale);
-        cfg.adaptable = bAdapt;
         redraw();
-      });
+      };
+    }).transition().duration(0).tween("projection", function() {
+      proj = prj;
+      ratio = proj.ratio;
+      height = width / proj.ratio;
+      scale = proj.scale * width/1024;
+      canvas.attr("width", width).attr("height", height);
+      if (parent) parent.style.height = px(height);
+      cfg.projection = config.projection;
+      prjMap = Celestial.projection(config.projection).rotate(rot).translate([width/2, height/2]).scale(scale);
+      map.projection(prjMap);
+      setClip(proj.clip); 
+      zoom.projection(prjMap).scaleExtent([scale, scale*5]).scale(scale);
+      cfg.adaptable = bAdapt;
+      redraw();
+    });
+    return interval;
   }
 
   
@@ -338,11 +352,13 @@ Celestial.display = function(config) {
     var rot = prjMap.rotate();
     
     if (cfg.adaptable) adapt = Math.sqrt(prjMap.scale()/scale);
+    if (!adapt) adapt = 1;
     if (cfg.orientationfixed) {
       rot[2] = cfg.center[2]; 
       prjMap.rotate(rot);
     }
-    base = cfg.stars.size * adapt;
+    //starbase = cfg.stars.size * adapt;
+    //dsobase = cfg.dsos.size * adapt;
     cfg.center = [-rot[0], -rot[1], rot[2]];
     
     setCenter(cfg.center, cfg.transform);
@@ -515,8 +531,8 @@ Celestial.display = function(config) {
   }
 
   function dsoSize(prop) {
-    if (!prop.mag || prop.mag == 999) return Math.pow(parseInt(prop.dim) * base / 7, 0.5); 
-    return Math.pow(2 * base-prop.mag, 1.4);
+    if (!prop.mag || prop.mag == 999) return Math.pow(parseInt(prop.dim) * dsobase * adapt / 7, 0.5); 
+    return Math.pow(2 * dsobase * adapt - prop.mag, 1.4);
   }
  
 
@@ -542,7 +558,7 @@ Celestial.display = function(config) {
   function starSize(d) {
     var mag = d.properties.mag;
     if (mag === null) return 0.1; 
-    var r = base * Math.exp(exp * (mag+2));
+    var r = starbase * adapt * Math.exp(exp * (mag+2));
     return Math.max(r, 0.1);
   }
   
@@ -580,6 +596,30 @@ Celestial.display = function(config) {
     return [rot[0] - coords[0], rot[1] - coords[1], rot[2] + coords[2]];
   }
   
+  
+  function animate() {
+    if (!animations || animations.length < 1) return;
+
+    var d, a = animations[current];
+    
+    switch (a.param) {
+      case "projection": d = reproject({projection:a.value}); break;
+      case "center": d = rotate({center:a.value}); break;
+      case "zoom": d = zoomBy(a.value);
+    }
+    if (a.callback) setTimeout(a.callback, d);
+    current++;
+    if (repeat === true && current === animations.length) current = 0;
+    d = a.duration === 0 || a.duration < d ? d : a.duration;
+    if (current < animations.length) aID = setTimeout(animate, d);
+  }
+  
+  function stop() {
+    clearTimeout(aID);
+    //current = 0;
+    //repeat = false;
+  }
+  
   // Exported objects and functions for adding data
   this.container = container;
   this.clip = clip;
@@ -603,10 +643,31 @@ Celestial.display = function(config) {
     container.append("path").datum(circle).attr("class", "horizon");
     load(); 
   }; 
-  this.reproject = function(config) { reproject(config); }; 
   this.apply = function(config) { apply(config); }; 
-  this.rotate = function(config) { if (!config) return cfg.center; rotate(config); }; 
-  this.zoomBy = function(factor) { if (!factor) return prjMap.scale(); zoomBy(factor); };
+  this.reproject = function(config) { return reproject(config); }; 
+  this.rotate = function(config) { if (!config) return cfg.center; return rotate(config); }; 
+  this.zoomBy = function(factor) { if (!factor) return prjMap.scale()/scale; return zoomBy(factor); };
+  this.color = function(type) {
+    if (!type) return "#000";
+    if (has(cfg.dsos.symbols, type)) return cfg.dsos.symbols[type].fill;
+    return "#000";
+  };
+  this.animate = function(anims, dorepeat) { 
+    if (!anims) return; 
+    animations = anims; 
+    current = 0; 
+    repeat = dorepeat ? true : false; 
+    animate(); 
+  };
+  this.stop  = function(wipe) {
+    stop();
+    if (wipe === true) animations = [];
+  };
+  this.go = function(index) {
+    if (animations.length < 1) return;
+    if (index && index < animations.length) current = index;
+    animate(); 
+  };
   
   load();
 };
@@ -940,7 +1001,7 @@ var settings = {
     desig: false,   // Show all names, including Draper and Hipparcos
     namestyle: { fill: "#ddddbb", font: "11px Georgia, Times, 'Times Roman', serif", align: "left", baseline: "top" },
     namelimit: 2.5,  // Show only names for stars brighter than namelimit
-    size: 7,       // Maximum size (radius) of star circle in pixels
+    size: 7,       // Scale size (radius) of star circle in pixels
     data: "stars.6.json" // Data source for stellar data
   },
   dsos: {
@@ -950,6 +1011,7 @@ var settings = {
     desig: true,   // Show short DSO names
     namestyle: { fill: "#cccccc", font: "11px Helvetica, Arial, serif", align: "left", baseline: "top" },
     namelimit: 4,  // Show only names for DSOs brighter than namelimit
+    size: null,    // Optional seperate scale size for DSOs, null = stars.size
     data: "dsos.bright.json",  // Data source for DSOs
     symbols: {  //DSO symbol styles
       gg: {shape: "circle", fill: "#ff0000"},                                 // Galaxy cluster
@@ -964,7 +1026,7 @@ var settings = {
       en: {shape: "square", fill: "#ff00cc"},                                 // Emission nebula
       bn: {shape: "square", fill: "#ff00cc"},                                 // Generic bright nebula
       sfr:{shape: "square", fill: "#cc00ff"},                                 // Star forming region
-      rn: {shape: "square", fill: "#00ooff"},                                 // Reflection nebula
+      rn: {shape: "square", fill: "#0000ff"},                                 // Reflection nebula
       pn: {shape: "diamond", fill: "#00cccc"},                                // Planetary nebula 
       snr:{shape: "diamond", fill: "#ff00cc"},                                // Supernova remnant
       dn: {shape: "square", fill: "#999999", stroke: "#999999", width: 2},    // Dark nebula 
@@ -1149,7 +1211,7 @@ Canvas.symbol = function() {
     },
     "square": function(ctx) {
       var s = Math.sqrt(size()), 
-          r = s/2;
+          r = s/1.7;
       ctx.moveTo(pos[0]-r, pos[1]-r);
       ctx.lineTo(pos[0]+r, pos[1]-r);
       ctx.lineTo(pos[0]+r, pos[1]+r);
@@ -1159,7 +1221,7 @@ Canvas.symbol = function() {
     },
     "diamond": function(ctx) {
       var s = Math.sqrt(size()), 
-          r = s/2;
+          r = s/1.5;
       ctx.moveTo(pos[0], pos[1]-r);
       ctx.lineTo(pos[0]+r, pos[1]);
       ctx.lineTo(pos[0], pos[1]+r);
@@ -1191,10 +1253,10 @@ Canvas.symbol = function() {
     "marker": function(ctx) {
       var s = Math.sqrt(size()), 
           r = s/2;
-      ctx.moveTo(pos[0], pos[1]-s);
-      ctx.lineTo(pos[0], pos[1]+s);
-      ctx.moveTo(pos[0]-s, pos[1]);
-      ctx.lineTo(pos[0]+s, pos[1]);
+      ctx.moveTo(pos[0], pos[1]-r);
+      ctx.lineTo(pos[0], pos[1]+r);
+      ctx.moveTo(pos[0]-r, pos[1]);
+      ctx.lineTo(pos[0]+r, pos[1]);
       ctx.closePath();
       return r;
     },

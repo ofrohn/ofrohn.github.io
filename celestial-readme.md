@@ -26,8 +26,9 @@ var config = {
   projection: "aitoff",    // Map projection used: see below
   transform: "equatorial", // Coordinate transformation: equatorial (default),
                            // ecliptic, galactic, supergalactic
-  center: null,       // Initial center coordinates in equatorial transformation only
-                      // [hours, degrees], null = default center
+  center: null,       // Initial center coordinates in set transform
+                      // [longitude, latitude, orientation] all in degrees 
+                      // null = default center [0,0,0]
   orientationfixed: true,  // Keep orientation angle the same as center[2]
   adaptable: true,    // Sizes are increased with higher zoom-levels
   interactive: true,  // Enable zooming and rotation with mousewheel and dragging
@@ -215,10 +216,36 @@ __Exposed functions__
   Load all the data and redraw the whole map. 
   Optional transform: change the coordinate space transformation
 
-* `Celestial.reproject({projection:&lt;see above>})`
+* `Celestial.reproject({projection:<see above>})`
   Change the map projection. 
   projection: new projection to set
 
+### Animations  
+
+__Exposed functions__  
+
+* `Celestial.animate(anims, dorepeat)`  
+  Set the anmation sequence and start it.  
+  _anims_: sequence data (see below)  
+  _dorepeat_: repeat sequence in endless loop  
+  
+* `Celestial.stop(wipe)`  
+  Stop the animation after the current step finishes.  
+  _wipe_: if true, delete the list of animation steps as well  
+
+* `Celestial.go(index)`  
+  Continue the animation, if animation steps set.  
+  _index_: if given, continue at step #index in the anims arrray,  
+  if not, continue where the animation was stopped  
+
+  
+__Animation sequence format:__  
+ [  
+ {_param_: Animated parameter projection|center|zoom  
+   _value_: Adequate value for each parameter  
+   _duration_: in milliseconds, 0 = exact length of transition  
+   _callback_: optional callback function called at the end of the transition   
+ }, ...]   
   
 ### Files
 
@@ -230,6 +257,7 @@ __GeoJSON data files__
 * `dsos.6.json` Deep space objects down to 6th magnitude \[2\]
 * `dsos.14.json` Deep space objects down to 14th magnitude \[2\]
 * `dsos.bright.json` Some of the brightest showpiece DSOs of my own choosing
+* `messier.json` Messier objects \[8\]
 * `lg.json` Local group and Milky Way halo galaxies/globiular clusters. My own compilation \[6\]
 * `constellations.json` Constellation data  \[3\] 
 * `constellations.bounds.json` Constellation boundaries \[4\]
@@ -252,7 +280,7 @@ __Sources__
 * \[5\] [Milky Way Outline Catalog](http://www.skymap.com/milkyway_cat.htm), Jose R. Vieira  
 * \[6\] Lots of sources, see [blog](http://armchairastronautics.blogspot.com/p/milky-way-halo.html) [pages](http://armchairastronautics.blogspot.com/p/local-group.html) for complete list  
 * \[7\] [Saguaro Astronomy Club Asterisms](http://www.saguaroastro.org/content/downloads.htm) \(scroll down\)  
-
+* \[8\] [Messier Objects with Data](http://messier.seds.org/data.html), H.Frommert/seds.org  
 All data converted to GeoJSON at J2000 epoch, positions converted from 0...24h right ascension to -180...180 degrees longitude as per GeoJSON requirements, 0...12h -> 0...180º; 12...24h -> -180...0º
 
 __Other files__
