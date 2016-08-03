@@ -101,7 +101,7 @@ THREEx.Planets.create = function(body, skipextras) {
     mesh.add(THREEx.Planets.createCorona());
   }  
 
-  mesh.rotation.set(THREE.Math.degToRad(25), 0, THREE.Math.degToRad(p.tilt));  
+  mesh.rotation.set(0, 0, THREE.Math.degToRad(p.tilt));  
   return mesh;
 }
   
@@ -130,7 +130,7 @@ THREEx.Planets.createClouds = function(body) {
       loader = new THREE.TextureLoader();
 
   var mesh = new THREE.Mesh(
-    new THREE.SphereGeometry(p.radius + 0.005, 32, 32),
+    new THREE.SphereGeometry(p.radius + 0.001, 32, 32),
     new THREE.MeshPhongMaterial({
       map: loader.load(map),
       transparent: true
