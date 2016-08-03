@@ -39,7 +39,8 @@ mv('-f', 'viewer.html', 'asteroids-viewer.html');
 sed('-i', 'style.css', 'asteroids.css', 'asteroids-viewer.html');
 
 cp('-f', '../d3-orrery/data/*', 'data');
-cp('-f', '../d3-orrery/img/*', 'img');
+cp('-f', '../d3-orrery/images/*', 'img');
+cp('-f', '../d3-orrery/maps/*', 'maps');
 cp('-f', '../d3-orrery/lib/*', 'lib');
 
 echo('Copying d3-orrery');
