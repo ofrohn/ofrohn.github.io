@@ -38,10 +38,8 @@ mv('-f', 'viewer.html', 'asteroids-viewer.html');
 
 sed('-i', 'style.css', 'asteroids.css', 'asteroids-viewer.html');
 
-cp('-f', '../d3-orrery/data/*', 'data');
-cp('-f', '../d3-orrery/images/*', 'img');
-cp('-f', '../d3-orrery/maps/*', 'maps');
-cp('-f', '../d3-orrery/lib/*', 'lib');
+cp('-f', '../asteroid-families/data/*', 'data');
+
 
 echo('Copying d3-orrery');
 
@@ -50,17 +48,19 @@ cp('-f', [
   '../d3-orrery/orrery.min.js', 
   '../d3-orrery/orrery.tar.gz',
   '../d3-orrery/readme.md', 
-  '../d3-orrery/style.css',
+  '../d3-orrery/orrery.css',
   '../d3-orrery/viewer.html'
 ], './');
 
 mv('-f', 'readme.md', 'orrery-readme.md');
-mv('-f', 'style.css', 'orrery.css');
 mv('-f', 'viewer.html', 'orrery-viewer.html');
 
-sed('-i', 'style.css', 'orrery.css', 'orrery-viewer.html');
-
 cp('-f', '../d3-orrery/data/*', 'data');
+cp('-f', '../d3-orrery/images/*', 'img');
+cp('-f', '../d3-orrery/maps/*', 'maps');
+cp('-f', '../d3-orrery/lib/*', 'lib');
+
+cp('-f', '../threex.planets/threex.planets.js', 'lib');
 
 
 echo('Done');
