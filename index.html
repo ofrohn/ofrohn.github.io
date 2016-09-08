@@ -32,13 +32,13 @@
 <p>Features display of stars from the <a href="http://www.cosmos.esa.int/web/hipparcos/hipparcos-2">Hipparcos catalogue</a> and <a href="http://saguaroastro.org/content/downloads.htm">deep sky objects</a> (DSOs) with a selectable magnitude limit up to 6, or choose different GeoJSON data source for higher magnitudes. Also shows constellations with names, lines and/or boundaries, the Milky Way band and grid lines. Alternate coordinate spaces e.g. ecliptc, galactic or supergalactic are also possible. Full support for zoom and rotation with mouse or gestures. The interactive viewer has a form that can set most parameters live on the map</p>
 
 <hgroup id="d3o"><h1>
-<a id="solar-system-map-with-d3js" class="anchor" href="#solar-system-map-with-d3js" aria-hidden="true"><span class="octicon octicon-link"></span></a>D3-Orrery</h1><h3>Solar System map with D3.js</h3>
+<a id="solar-system-map-with-d3js" class="anchor" href="#solar-system-map-with-d3js" aria-hidden="true"><span class="octicon octicon-link"></span></a>D3-Orrery</h1><h3>Solar System map with D3.js & three.js</h3>
       <a href="orrery-viewer.html" class="btn">Interactive Map</a>
       <a href="orrery.tar.gz" class="btn">Download Archive</a>
       <a href="https://github.com/ofrohn/d3-orrery" class="btn">GitHub Repository</a>
 </hgroup>
 
-<p>An interactive Solar System simulator (a.k.a. Orrery) implemented with D3.js for data handling and three.js for visualization. Shows planets as 3D bodies with surface texture and trajectories, as well as small bodies as simple sprites. Optional spacecraft with images and trajectories. Full support for zoom and rotation with mouse or gestures.
+<p>An interactive Solar System simulator (a.k.a. Orrery) implemented with d3.js for data handling and three.js for visualization. Shows planets as 3D bodies with surface texture and trajectories, as well as small bodies as simple sprites. Optional spacecraft with images and trajectories (tbi). Full support for zoom and rotation with mouse or gestures.
 </p>
 
 <hgroup id="d3a"><h1>
@@ -63,7 +63,7 @@
 
 
 <p style="text-align:center">***</p>
-<p>Since the maps use D3.js and HTML-5 canvas, they need a modern browser with canvas support, so any recent flavor of Chrome/Firefox/Safari/Opera or IE 9 and above should suffice. Check out the demo interactive viewers linked above or download the tarball <code>*.tar.gz</code> which contain everything for local usage tp play around with the data and code. Local loading works fine with Firefox; Chrome needs to be started with command line parameter  <code>--allow-file-access-from-files</code> to load local json files. Or use a local web server environment.</p>
+<p>Since the maps use d3.js, three.js and HTML5 canvas, they need a modern browser with canvas support, so any recent flavor of Chrome/Firefox/Safari/Opera or IE 9 and above should suffice. Check out the demo interactive viewers linked above or download the tarball <code>*.tar.gz</code> which contain everything for local usage tp play around with the data and code. Local loading works fine with Firefox; Chrome needs to be started with command line parameter  <code>--allow-file-access-from-files</code> to load local json files. Or use a local web server environment.</p>
 
 
 <p>Thanks to Mike Bostock and Jason Davies for <a href="http://d3js.org/">D3.js</a> and <a href="https://github.com/d3/d3-geo-projection">d3.geo.projections</a>.

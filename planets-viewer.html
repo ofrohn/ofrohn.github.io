@@ -4,11 +4,12 @@
   <script src='lib/three.min.js'></script>
   <script src='lib/OrbitControls.js'></script>
   <script src='lib/threex.planets.js'></script>
-  <script src='../threex.planets.js'></script>
 <body style='margin: 0px; overflow: hidden; text-align:center;'><script>
  //////////////////////////////////////////////////////////////////////////////////
  //  Init
  //////////////////////////////////////////////////////////////////////////////////
+  
+  THREEx.Planets.baseURL = "maps/";
 
   // init renderer
   var renderer = new THREE.WebGLRenderer({
