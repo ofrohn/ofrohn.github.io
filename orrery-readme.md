@@ -1,7 +1,7 @@
 # D3-Orrery
 
 An interactive Solar System simulator (a.k.a. Orrery) implemented with D3.js and three.js. Shows planets with images and trajectories, as well as small bodies as dots. Optional scacecraft with images and trajectories.
-* [Data formats](data/formats.md)
+* [Data formats](data/readme.md)
 
 ### Usage
 

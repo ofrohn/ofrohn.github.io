@@ -99,12 +99,12 @@ THREEx.Planets.create = function(body, skipextras) {
   if (p.hasOwnProperty("spec")) {
     arg.specularMap = loader.load(THREEx.Planets.baseURL + p.spec);  
   }
-  arg.specular = new THREE.Color( 0x333333 );
-  arg.shininess = 0.1;
   
   if (body === "sol") { //ommmmmmm
     var material = new THREE.MeshBasicMaterial(arg);
   } else {
+    arg.specular = new THREE.Color( 0x333333 );
+    arg.shininess = 0.1;
     var material = new THREE.MeshPhongMaterial(arg);
   }
   var mesh = new THREE.Mesh(geometry, material);
@@ -2109,6 +2109,42 @@ var getOrbit = function(dt, d) {
   return geo;
 };
 
+//from https://github.com/mrdoob/three.js/blob/master/examples/webgl_custom_attributes_points2.html
+var texture = new THREE.TextureLoader().load( "maps/circle.png" );
+texture.wrapS = THREE.RepeatWrapping;
+texture.wrapT = THREE.RepeatWrapping;
+
+var particleshader = new THREE.ShaderMaterial( {
+  uniforms: {
+    //amplitude: { value: 1.0 },
+    color:     { value: new THREE.Color( 0xffffff ) },
+    texture:   { value: texture }
+  },
+  vertexShader:  [
+    "attribute float size;",
+    "attribute vec3 ca;",
+    "varying vec3 vColor;",
+    "void main() {",
+      "vColor = ca;",
+      "vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
+      "gl_PointSize = size * ( 1.0 / -mvPosition.z );",
+      "gl_Position = projectionMatrix * mvPosition;",
+    "}"  
+  ].join( "\n" ),
+  fragmentShader: [
+    "uniform vec3 color;",
+    "uniform sampler2D texture;",
+    "varying vec3 vColor;",
+    "void main() {",
+      "vec4 color = vec4( color * vColor, 1.0 ) * texture2D( texture, gl_PointCoord );",
+      "gl_FragColor = color;",
+    "}"
+  ].join( "\n" ),  
+  transparent:    true
+  //lights: true
+});
+
+
 //Default configuration
 var settings = {
   width: 0,            // Default width; 0 = full width of parent
@@ -2179,8 +2215,7 @@ var Orrery = {
 };
 
 var container, parNode, renderer, scene, camera,
-    width, height, cfg,
-    sbomeshes = [],
+    width, height, cfg, sbomesh,
     renderFcts= [];
 
 var display = function(config, date) {
@@ -2283,44 +2318,43 @@ var display = function(config, date) {
   d3.json('data/sbo.json', function(error, json) {
     if (error) return console.log(error);
 
-    var data = [];
-    
-    var map = new THREE.TextureLoader().load("maps/circle.png");
-    var geo= [], mat = [], basesize = 0.006;
-    //12 discrete sizes
-    for (var i=1; i<=12; i++) {
-     geo.push(new THREE.Geometry());
-     mat.push(new THREE.PointsMaterial({
-       color:0xcc9999, 
-       map: map,
-       //blending: THREE.AdditiveBlending,
-       size: basesize * i,
-       transparent: true,
-       fog: true
-     }));
-   }
-   
-   for (var key in json) {
+    var data = [],
+        length = Object.keys(json).length,
+			  positions = new Float32Array( length * 3 ),
+			  colors = new Float32Array( length * 3 ),
+			  sizes = new Float32Array( length ),
+        i = 0;
+        
+    for (var key in json) {
       if (!has(json, key)) continue;
       var datum = {};
       //sbos: pos[x,y,z],name,r
-      //if (!isNumber(json[key].H)) { console.log(key); continue; }
       var sbo = getObject(dt, json[key]);
       datum.body = sbo;
-      var vec = new THREE.Vector3();
-      vec.fromArray(sbo.pos);
-      var index = Math.floor(sbo.r);
-      if (index > 12) index = 12;
-      geo[index-1].vertices.push(vec);
-      datum.size = index;
-      datum.vertex = geo[index-1].vertices.length - 1;
+      
+      var vec = new THREE.Vector3().fromArray(sbo.pos);
+      vec.toArray( positions, i * 3 );
+      
+      var col = new THREE.Color( 0xe9d1b1 ); 
+      col.toArray( colors, i * 3 );
+      
+      sizes[i] = sbo.r;
+      i++;
+      
       data.push(datum);
     }
-    for (i=0; i<12; i++) {
-      sbomeshes[i] = new THREE.Points(geo[i], mat[i]);
-      scene.add(sbomeshes[i]);
-    }
-    container.selectAll(".sbos").data(data)
+   
+    var geometry = new THREE.BufferGeometry();
+    geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+    geometry.addAttribute( 'size', new THREE.BufferAttribute( sizes, 1 ) );
+    geometry.addAttribute( 'ca', new THREE.BufferAttribute( colors, 3 ) ); 
+      
+    sbomesh = new THREE.Points( geometry, particleshader );
+    //sbomesh.receiveShadow = true;
+
+    scene.add( sbomesh );
+
+    container.selectAll(".sbos").data( data )
       .enter().append("path")
       .attr("class", "sbo");
   });
@@ -2330,7 +2364,7 @@ var display = function(config, date) {
     //meshes.forEach( function(d, i) { d.rotateOnAxis( new THREE.Vector3( 0, 1, 0 ), rot[i]); })
     
     var p = camera.position;
-    scene.fog.density = 0.05 / Math.pow(p.x*p.x + p.y*p.y + p.z*p.z, 0.5);
+    scene.fog.density = 0.05 / Math.pow( p.x*p.x + p.y*p.y + p.z*p.z, 0.5 );
     renderer.render(scene, camera);  
   });
   
@@ -2356,16 +2390,20 @@ var update = function(dt) {
     d.body.pos = pos;
     d.mesh.position.fromArray(pos);
   });
-    
-  container.selectAll(".sbo").each(function(d) { 
+  
+  var positions = sbomesh.geometry.getAttribute( 'position' ).array; 
+
+  container.selectAll(".sbo").each(function(d, i) { 
     var pos = updateObject(dt, d.body);
-    d.body.pos = pos;
-    
-    sbomeshes[d.size-1].geometry.vertices[d.vertex].fromArray(pos);
+    //d.body.pos = pos;
+    var vec = new THREE.Vector3().fromArray(pos);
+    vec.toArray( positions, i * 3 );
+
+    //sbomeshes[d.size-1].geometry.vertices[d.vertex].fromArray(pos);
    
     //d.mesh.position.fromArray(pos);
   });
-  sbomeshes.forEach( function(d) { d.geometry.verticesNeedUpdate = true; });
+  sbomesh.geometry.attributes.position.needsUpdate = true;
   
 };
 
