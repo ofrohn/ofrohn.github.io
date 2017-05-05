@@ -8,19 +8,15 @@ cp('-f', [
   '../d3-celestial/celestial.min.js', 
   '../d3-celestial/celestial.tar.gz',
   '../d3-celestial/readme.md', 
-  '../d3-celestial/celestial.css',
-  '../d3-celestial/dtpick.png'
-//  '../d3-celestial/viewer.html',
-//  '../d3-celestial/sky.html'
+  '../d3-celestial/celestial.css'
 ], './');
 
 cp('-f', '../d3-celestial/data/*', 'data');
+cp('-f', '../d3-celestial/images/*', 'images');
 cp('-f', '../d3-celestial/lib/*', 'lib');
 cp('-f', '../d3-celestial/demo/*', 'celestial-demo');
 
 mv('-f', 'readme.md', 'celestial-readme.md');
-//mv('-f', 'demo/viewer.html', 'demo/celestial-viewer.html');
-//mv('-f', 'demo/sky.html', 'demo/celestial-sky.html');
 
 echo('Copying asteroid-families');
 
@@ -57,10 +53,27 @@ mv('-f', 'readme.md', 'orrery-readme.md');
 mv('-f', 'viewer.html', 'orrery-viewer.html');
 
 cp('-f', '../d3-orrery/data/*', 'data');
-cp('-f', '../d3-orrery/images/*', 'images');
-cp('-f', '../d3-orrery/maps/*', 'maps');
+cp('-fR', '../d3-orrery/images/*', 'images');
 cp('-f', '../d3-orrery/lib/*', 'lib');
 
-cp('-f', '../threex.planets/threex.planets.js', 'lib');
+//cp('-f', '../threex.planets/threex.planets.js', 'lib');
+
+echo('Copying seh');
+
+cp('-f', [
+  '../seh/app.js', 
+  '../seh/data.js', 
+  '../seh/readme.md', 
+  '../seh/style.css',
+  '../seh/diag.html'
+], './');
+
+mv('-f', 'readme.md', 'seh-readme.md');
+mv('-f', 'style.css', 'seh.css');
+
+
+sed('-i', 'style.css', 'seh.css', 'diag.html');
+
+cp('-fR', '../seh/images/*', 'images');
 
 echo('Done');
