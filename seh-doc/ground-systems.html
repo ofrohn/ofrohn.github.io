@@ -3,7 +3,7 @@
 <head>
 	<title>Deep Space Exploration Infrastructure</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" media="screen" href="../style.css" type="text/css">
+<link rel="stylesheet" media="screen" href="../seh.css" type="text/css">
   <style type="text/css">
     body { padding:0; }
     canvas { }
@@ -11,28 +11,8 @@
     /*.infoPopup { border-radius:6px; display:inline-block; background:#fcfcf7; position:relative; margin:0px; border: 1px solid #000; opacity:1;  }
     .ninfoBox * { position:relative; }*/
   </style>
-<script type="text/javascript" src="../src/canvas.js"></script>
-<script type="text/javascript" src="../src/math.js"></script>
-<script type="text/javascript" src="../src/hist.js"></script>
-<script type="text/javascript" src="../data/config.js"></script>
-<script type="text/javascript" src="../data/common.js"></script>
-<script type="text/javascript" src="../data/data.js"></script>
-<script type="text/javascript" src="../data/probes.js"></script>
-<script type="text/javascript" src="../data/objects.js"></script>
-<script type="text/javascript" src="../data/lv.js"></script>
-<script type="text/javascript" src="../data/lc.js"></script>
-<script type="text/javascript" src="../src/utils.js"></script>
-<script type="text/javascript" src="../src/ui.js"></script>
-<script type="text/javascript" src="../src/parse.js"></script>
-<script type="text/javascript" src="../src/pos.js"></script>
-<script type="text/javascript" src="../src/moons.js"></script>
-<script type="text/javascript" src="../src/mission.js"></script>
-<script type="text/javascript" src="../src/destination.js"></script>
-<script type="text/javascript" src="../data/elements.js"></script>
-<script type="text/javascript" src="../src/panel.js"></script>
-<script type="text/javascript" src="../src/info.js"></script>
-<script type="text/javascript" src="../src/launch.js"></script>
-<script type="text/javascript" src="../data/dsn.js"></script>
+<script type="text/javascript" src="../data.js"></script>
+<script type="text/javascript" src="../app.js"></script>
 <script type="text/javascript" src="countries.geo.json"></script>
 <script type="text/javascript">
 
@@ -72,14 +52,10 @@
 
     }
     
-    cnv = new Cdraw("lcmap");
+    Hist.init();
     
-    SSEH.lc = "";
-    Common.symbols = Hist.Symbols();
-    Common.sprites = Hist.Sprites();
-    Common.names = new Names("SSEH");
-    Common.SPC = SSEH.SPC;
- 
+    cnv = new Cdraw("lcmap");
+
     cnv.fillrect(0,0,w,h,water);
     cnv.image(img,0,0,w,h);
     cnv.setparam("globalAlpha", 0.6);

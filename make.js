@@ -64,15 +64,11 @@ cp('-f', [
   '../seh/app.js', 
   '../seh/data.js', 
   '../seh/readme.md', 
-  '../seh/style.css',
+  '../seh/seh.css',
   '../seh/diag.html'
 ], './');
 
 mv('-f', 'readme.md', 'seh-doc/readme.md');
-mv('-f', 'style.css', 'seh.css');
-
-
-sed('-i', 'style.css', 'seh.css', 'diag.html');
 
 cp('-fR', '../seh/images/*', 'images');
 cp('-fR', '../seh/doc/*', 'seh-doc');
