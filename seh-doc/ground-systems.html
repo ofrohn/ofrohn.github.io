@@ -25,8 +25,22 @@
       bold = "bold 16px 'Trebuchet MS'",
       normal = "normal 16px 'Trebuchet MS'",
       italic = "italic 14px 'Trebuchet MS'",
-      rkt,dsh,tdn;
+      rkt, dsh, tdn, cc, spr, icons, img;
   
+  function load() {
+  
+    cc = new Image();
+    cc.src = "../images/res/cc.png";
+    spr = new Image();
+    spr.src = "../images/res/sprites.png";
+    icons = new Image();
+    icons.src = "../images/res/icons.png";
+    img = new Image();
+    img.onload = init;
+    img.src = "relief.png";
+  
+  }
+
   function init() {
     var i, j, x, y, cnv, t, b, col, loc, lcs = {}, dsn = {}, tdz = {}, names = [], urls = [],
         sfc = "AUT,BEL,CHE,CHN,CZE,DEU,DNK,ESP,EST,FIN,FRA,GBR,GRC,GUF,HUN,IND,IRL,ITA,JPN,LUX,NLD,NOR,POL,PRT,ROU,RUS,SWE,USA",
@@ -34,14 +48,6 @@
   
 
     var ctrys = ["cn","eu","ind","jp","ru","us"];
-    img = new Image();
-    img.src = "relief.png";
-    cc = new Image();
-    cc.src = "../images/res/cc.png";
-    spr = new Image();
-    spr.src = "../images/res/sprites.png";
-    icons = new Image();
-    icons.src = "../images/res/icons.png";
     rkt = {}; dsh = {}; tdn = {}; ccc = {};
 
     for (var i=0; i<ctrys.length; i++) {
@@ -737,7 +743,7 @@ SSEH.showDSN = function(e, nd) {
   
 </head>
 
-<body onload="init()">
+<body onload="load()">
 <canvas id="lcmap" width="2048" height="1024"></canvas>
 <div id="urls"></div>
 </body>
