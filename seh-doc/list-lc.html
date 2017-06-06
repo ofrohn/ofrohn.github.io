@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>Solar System Exploration History - Launch Centers</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="screen" href="style.css" type="text/css">
+  <style type="text/css">
+    a.close { display:none; }
+    .infoPopup { border-radius:6px; display:inline-block; background:#fcfcf7; position:relative; margin:0px; border: 1px solid #000; opacity:1;  }
+    .ninfoBox * { position:relative; }
+  </style>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="common.js"></script>
+<script type="text/javascript" src="data.js"></script>
+<script type="text/javascript" src="probes.js"></script>
+<script type="text/javascript" src="objects.js"></script>
+<script type="text/javascript" src="lv.js"></script>
+<script type="text/javascript" src="lc.js"></script>
+<script type="text/javascript" src="math.js"></script>
+<script type="text/javascript" src="canvas.js"></script>
+<script type="text/javascript" src="utils.js"></script>
+<script type="text/javascript" src="parse.js"></script>
+<script type="text/javascript" src="mission.js"></script>
+<script type="text/javascript" src="moons.js"></script>
+<script type="text/javascript" src="panel.js"></script>
+<script type="text/javascript" src="destination.js"></script>
+<script type="text/javascript" src="hist.js"></script>
+<script type="text/javascript" src="launch.js"></script>
+<script type="text/javascript">
+  
+  function getHeight(h, n, num) {
+    var i, res = 0;
+    for (i=0;i<h.length;i++) {
+      if (res < h[i]) res = h[i];
+    };
+    return res + 6;
+  };
+  
+  function init() {
+    var i, j, t, key, lcs = {}, probes = {}, clm, l, col, ccol,
+        id, frag, box, lcsort = [], dt = "", h = [], hrow, im = [], ids = "",
+        COLNUM = 7, 
+        bdy = document.getElementsByTagName("body")[0];
+
+    SSEH.lc = "";
+
+    Common.symbols = Hist.Symbols();
+    Common.sprites = Hist.Sprites();
+    Common.names = new Names("SSEH");
+    Common.SPC = SSEH.SPC;
+  
+    for (key in missions) {
+      probes[key] = new Mission(key);
+    };
+
+    i = 0;
+    for (key in Common.lc) {
+      lcs[key] = new LC(key);
+    };
+    
+    clm = Create.div(bdy, "legColW", "legColLV", {t:10, l:10, w:460});
+  
+    frag = document.createDocumentFragment();
+/*    for (key in probes) {
+      l = probes[key].AchievementsLnch();
+      if (!l) continue;
+      id = Common.names.findLV(l.lv);
+      if (id) {
+        if (l.id != "" && ids.search(l.id) != -1) continue;
+        lvs[id].setStat("t");
+        if (l.st == "lf") lvs[id].setStat("f");
+        if (l.st == "pl") lvs[id].setStat("p");
+        lvs[id].setStat("dt", l.dt);
+        ids += l.id;
+      };
+    };
+*/
+    for (key in lcs) {
+      lcsort.push({id:key, n:lcs[key].Name()});
+    };
+    lcsort.sort( function(a, b) { return a.n <= b.n?-1:1; } );
+    
+    for (i=0; i<lcsort.length; i++) {
+      key = lcsort[i].id;
+      t = lcs[key].Box();
+      t.style.left = px(10);
+      t.style.top = "auto";
+      frag.appendChild(t)
+    };
+
+    
+    clm.appendChild(frag);
+
+  /*  clm = Create.div(bdy, "legColW bold", "legCol0", {t:640, l:10, w:2720});
+    Create.span(clm, {n:"Lauch Vehicle Statistics"}, "legTitle");
+    Create.text(clm, " As used for Solar System exploration, in order of appearance;");
+    Create.text(clm, " Stats: Number of total / failed / planned launches;");
+    Create.text(clm, " LEO, GTO, HO: Payload mass to Low Earth, Geostationary Transfer and Heliocentric Orbit.");
+    Create.br(clm);
+    Create.br(clm);
+*/
+  };
+
+  
+</script>
+  
+</head>
+
+<body onload="init()">
+<!--LV images from <a href="http://historicspacecraft.com/">Historic Spacecraft</a>, data mostly from <a href="http://space.skyrocket.de/">Gunter's Space Page</a> and <a href="http://planet4589.org/space/lvdb/">JSR Launch Vehicle Database</a>.-->
+</body>
+</html>
