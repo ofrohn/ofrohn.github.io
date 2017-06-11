@@ -3,29 +3,14 @@
 <head>
 	<title>Solar System Exploration History - Launch Centers</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <link rel="stylesheet" media="screen" href="style.css" type="text/css">
+  <link rel="stylesheet" media="screen" href="../seh.css" type="text/css">
   <style type="text/css">
     a.close { display:none; }
-    .infoPopup { border-radius:6px; display:inline-block; background:#fcfcf7; position:relative; margin:0px; border: 1px solid #000; opacity:1;  }
+    .infoPopup { border-radius:6px; display:inline-block; background:#fcfcf7; position:relative; margin:6px 0px; border: 1px solid #000; opacity:1;  }
     .ninfoBox * { position:relative; }
   </style>
-<script type="text/javascript" src="config.js"></script>
-<script type="text/javascript" src="common.js"></script>
-<script type="text/javascript" src="data.js"></script>
-<script type="text/javascript" src="probes.js"></script>
-<script type="text/javascript" src="objects.js"></script>
-<script type="text/javascript" src="lv.js"></script>
-<script type="text/javascript" src="lc.js"></script>
-<script type="text/javascript" src="math.js"></script>
-<script type="text/javascript" src="canvas.js"></script>
-<script type="text/javascript" src="utils.js"></script>
-<script type="text/javascript" src="parse.js"></script>
-<script type="text/javascript" src="mission.js"></script>
-<script type="text/javascript" src="moons.js"></script>
-<script type="text/javascript" src="panel.js"></script>
-<script type="text/javascript" src="destination.js"></script>
-<script type="text/javascript" src="hist.js"></script>
-<script type="text/javascript" src="launch.js"></script>
+<script type="text/javascript" src="../data.js"></script>
+<script type="text/javascript" src="../app.js"></script>
 <script type="text/javascript">
   
   function getHeight(h, n, num) {
@@ -43,11 +28,9 @@
         bdy = document.getElementsByTagName("body")[0];
 
     SSEH.lc = "";
-
-    Common.symbols = Hist.Symbols();
-    Common.sprites = Hist.Sprites();
-    Common.names = new Names("SSEH");
-    Common.SPC = SSEH.SPC;
+    SSEH.path("../images/");
+    Hist.init();
+    UI.scale = SSEH.SCALE;
   
     for (key in missions) {
       probes[key] = new Mission(key);
@@ -58,7 +41,7 @@
       lcs[key] = new LC(key);
     };
     
-    clm = Create.div(bdy, "legColW", "legColLV", {t:10, l:10, w:460});
+    clm = Create.div(bdy, "legColW", "legColLV", {t:10, l:10, w:480});
   
     frag = document.createDocumentFragment();
 /*    for (key in probes) {
@@ -84,6 +67,7 @@
       key = lcsort[i].id;
       t = lcs[key].Box();
       t.style.left = px(10);
+      //t.style.width = px(442);
       t.style.top = "auto";
       frag.appendChild(t)
     };
@@ -91,14 +75,7 @@
     
     clm.appendChild(frag);
 
-  /*  clm = Create.div(bdy, "legColW bold", "legCol0", {t:640, l:10, w:2720});
-    Create.span(clm, {n:"Lauch Vehicle Statistics"}, "legTitle");
-    Create.text(clm, " As used for Solar System exploration, in order of appearance;");
-    Create.text(clm, " Stats: Number of total / failed / planned launches;");
-    Create.text(clm, " LEO, GTO, HO: Payload mass to Low Earth, Geostationary Transfer and Heliocentric Orbit.");
-    Create.br(clm);
-    Create.br(clm);
-*/
+
   };
 
   
@@ -107,6 +84,6 @@
 </head>
 
 <body onload="init()">
-<!--LV images from <a href="http://historicspacecraft.com/">Historic Spacecraft</a>, data mostly from <a href="http://space.skyrocket.de/">Gunter's Space Page</a> and <a href="http://planet4589.org/space/lvdb/">JSR Launch Vehicle Database</a>.-->
+
 </body>
 </html>
