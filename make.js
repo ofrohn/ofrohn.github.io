@@ -6,7 +6,7 @@ echo('Copying d3-celestial');
 cp('-f', [
   '../d3-celestial/celestial.js', 
   '../d3-celestial/celestial.min.js', 
-  '../d3-celestial/celestial.tar.gz',
+  //'../d3-celestial/celestial.tar.gz',
   '../d3-celestial/readme.md', 
   '../d3-celestial/celestial.css'
 ], './');
@@ -23,7 +23,7 @@ echo('Copying asteroid-families');
 cp('-f', [
   '../asteroid-families/asteroids.js', 
   '../asteroid-families/asteroids.min.js', 
-  '../asteroid-families/asteroids.tar.gz',
+//  '../asteroid-families/asteroids.tar.gz',
   '../asteroid-families/readme.md', 
   '../asteroid-families/style.css',
   '../asteroid-families/viewer.html'
@@ -43,7 +43,7 @@ echo('Copying d3-orrery');
 cp('-f', [
   '../d3-orrery/orrery.js', 
   '../d3-orrery/orrery.min.js', 
-  '../d3-orrery/orrery.tar.gz',
+//  '../d3-orrery/orrery.tar.gz',
   '../d3-orrery/readme.md', 
   '../d3-orrery/orrery.css',
   '../d3-orrery/viewer.html'
@@ -63,6 +63,8 @@ echo('Copying seh');
 cp('-f', [
   '../seh/app.js', 
   '../seh/data.js', 
+  '../seh/app-obs.js', 
+  '../seh/data-obs.js', 
   '../seh/readme.md', 
   '../seh/seh.css',
   '../seh/diag.html'
