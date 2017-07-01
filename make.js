@@ -53,7 +53,13 @@ cp('-f', '../d3-orrery/data/*', 'data');
 cp('-fR', '../d3-orrery/images/*', 'images');
 cp('-f', '../d3-orrery/lib/*', 'lib');
 
-//cp('-f', '../threex.planets/threex.planets.js', 'lib');
+echo('Copying threex.planets');
+
+cp('-f', '../threex.planets/lib/threex.planets.js', 'lib');
+cp('-f', '../threex.planets/lib/planetary.js', 'lib');
+cp('-f', '../threex.planets/data/moons.js', 'data');
+cp('-f', '../threex.planets/examples/*.*', 'threex-planets-demo');
+sed('-i', '../images/', '../images/maps/', 'lib/threex.planets.js');
 
 echo('Copying seh');
 
