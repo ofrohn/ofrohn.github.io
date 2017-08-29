@@ -15,7 +15,7 @@ cp('-f', '../d3-celestial/images/*', 'images');
 cp('-f', '../d3-celestial/lib/*', 'lib');
 cp('-f', '../d3-celestial/demo/*', 'celestial-demo');
 
-mv('-f', 'readme.md', 'celestial-readme.md');
+mv('-f', 'readme.md', 'celestial-demo/readme.md');
 
 echo('Copying asteroid-families');
 
