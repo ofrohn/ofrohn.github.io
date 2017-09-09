@@ -67,10 +67,10 @@ sed('-i', '../images/', '../images/maps/', 'lib/threex.planets.js');
 echo('Copying seh');
 
 cp('-f', [
-  '../seh/app.js', 
-  '../seh/data.js', 
-  '../seh/app-obs.js', 
-  '../seh/data-obs.js', 
+  '../seh/seh-app.min.js', 
+  '../seh/seh-data.min.js', 
+  '../seh/obs-app.min.js', 
+  '../seh/obs-data.min.js', 
   '../seh/readme.md', 
   '../seh/seh.css',
   '../seh/diag.html'
