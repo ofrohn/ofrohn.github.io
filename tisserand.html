@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>Tisserand parameter</title>
+<style>
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2px;
+}
+
+</style>
+</head><body>
+<script src="lib/d3.v4.js"></script>
+<script>
+/* http://www2.ess.ucla.edu/~jewitt/tisserand.html */
+
+// set the dimensions and margins of the graph
+var margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = 800 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom,
+    deg2rad = Math.PI / 180,
+    // Semimajor axis of the perturbing body (Jupiter)
+    ap = {
+      j: 5.204,
+      s: 9.537,
+      u: 19.189,
+      n: 30.070
+    }      
+    limits = {
+      a: {min: 1, max: 10, def: 3, y0:-2, y1:6, unit:"AU"},       // semimajor axis 1...10 AU
+      e: {min: 0, max: 1, def: 0.1, y0:-2.5, y1:6.5, unit:""},      // eccentricity 0...1
+      i: {min: 0, max: Math.PI, def: 0.1, y0:-2.5, y1:6.5, unit:"\u00b0"} // inclination 0...Pi rad
+    },
+    selected = [];
+    palette = ["#fff5eb","#fee6ce","#fdd0a2","#fdae6b","#fd8d3c","#f16913","#d94801","#a63603","#7f2704","#6f1802","#2f0800"];
+
+// set the ranges
+var x = d3.scaleLinear().range([0, width]),
+    y = d3.scaleLinear().range([height, 0]),
+    z = d3.scaleOrdinal(palette);
+
+// define the line
+var valueline = d3.line()
+    .x(function(d) { return x(d.x); })
+    .y(function(d) { return y(d.y); });
+
+    
+var svg = d3.select("body").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom),
+    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  
+var ctrl = d3.select("body").append("div").attr("class", "ctrl");
+
+ctrl.append("input").attr("type", "button").attr("value", "a").attr("id", "a").on("click", function() {
+  update(generate("a"));
+});
+ctrl.append("input").attr("type", "button").attr("value", "i").attr("id", "i").on("click", function() {
+  update(generate("i"));
+});
+ctrl.append("input").attr("type", "button").attr("value", "e").attr("id", "e").on("click", function() {
+  update(generate("e"));
+});
+
+ctrl.append("input").attr("type", "range").attr("min", 0).attr("max", 1).attr("step", 0.05).attr("id", "second").attr("value", 0).on("change", function() {
+  update(generate(selected[0]));
+});
+ctrl.append("label").attr("title", "Set " + selected[1]).attr("id", "lblSecond").attr("for", "second").html(selected[1] + ": " + $("second").value);
+
+ctrl.append("input").attr("type", "range").attr("min", 0).attr("max", 1).attr("step", 0.05).attr("id", "third").attr("value", 0).on("change", function() {
+  update(generate(selected[0]));
+});
+ctrl.append("label").attr("title", "Set " + selected[2]).attr("id", "lblThird").attr("for", "third");
+
+update(generate("a"));
+
+function update(data) {
+  g.selectAll("*").remove();
+  
+  //vlines.data(data).enter();
+  vlines = g.selectAll(".vlines")
+    .data(data)
+    .enter().append("g")
+    .attr("class", "vline");    
+
+  vlines.append("path")
+    .attr("class", "line")
+    .attr("d",  function(d) { return valueline(d.values); })
+    .style("stroke", function(d) { return "#f60"; });
+/*
+  vlines.append("text")
+      .datum(function(d) { return {id: d.id, value: d.values[0]}; })
+      .attr("transform", function(d) { return "translate(" + x(d.value.x) + "," + y(d.value.y) + ")"; })
+      .attr("x", 3)
+      .attr("dy", "0.35em")
+      .style("font", "10px sans-serif")
+      .text(function(d) { if (selected[1] === "i") return Round(d.id * 180 / Math.PI, 1); return Round(d.id, 1); });
+*/
+  // Add the X Axis
+  g.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x));
+
+  // Add the Y Axis
+  g.append("g").call(d3.axisLeft(y));
+  
+  g.append("text")
+    .attr("class", "x label")
+    .attr("text-anchor", "middle")
+    .attr("x", width / 2)
+    .attr("y", height + 6)
+    .attr("dy", "1.5em")
+    .text(selected[0] + " [" + limits[selected[0]].unit + "]");
+  
+  g.append("text")
+    .attr("class", "y label")
+    .attr("text-anchor", "middle")
+    .attr("x", -height / 2)
+    .attr("y", 0)
+    .attr("dy", "-1.5em")
+    .attr("transform", "rotate(-90)")
+    .text("Tisserand parameter Tj");
+  
+  $("lblSecond").innerHTML = getValue(selected[1], "second");
+  $("lblThird").innerHTML = getValue(selected[2], "third");;
+}
+
+
+function getValue(what, where) {
+  var res = $(where).value * 1;
+
+  if (what === "i") res = Round(res /= deg2rad, 2);
+
+  return what + ": " + res + limits[what].unit;
+  
+}
+
+function generate(what) {
+  var res = {id:1, values:[]}, 
+      tiss, n = 0,
+      l = limits[what],
+      curr = {a:3, i:0.1, e:0.1};
+  selected = [what].concat("aei".replace(what, '').split(''));
+
+  curr[selected[1]] = adapt(selected[1], "second");
+  curr[selected[2]] = adapt(selected[2], "third");
+  
+  for (var i=l.min; i<l.max; i+=(l.max-l.min)/100) {
+    curr[what] = i;
+    tiss = tisserand(curr);
+    if (what === "i")
+      res.values.push({x:i*180/Math.PI, y:tiss});
+    else
+      res.values.push({x:i, y:tiss});
+  }
+  
+  x.domain([0, d3.max(res.values, function(c) { return c.x; }) ]);
+  y.domain([l.y0, l.y1]);
+  z.domain(res.id);
+
+  return [res];
+}
+
+function adapt(what, where) {
+  var node = $(where),
+      l = limits[what];
+
+  node.min = l.min;
+  node.max = l.max;
+  node.step = Round((l.max-l.min) / 100, 2);
+  if (node.value > l.max) node.value = l.max;
+  if (node.value < l.min) node.value = l.min;
+  return node.value;
+}
+
+//a vs i, a vs e, i vs e
+function tisserand(bdy) {
+  var a = ap.j;
+  return a / bdy.a + 2 * Math.sqrt(bdy.a / a * (1 - bdy.e*bdy.e)) * Math.cos(bdy.i);
+}
+
+function Round(x, dg) { return(Math.round(Math.pow(10,dg)*x)/Math.pow(10,dg)); }
+function $(id) { return document.getElementById(id); }
+
+</script>
+<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');ga('create', 'UA-105720254-1', 'auto');ga('send', 'pageview');</script>
+</body>

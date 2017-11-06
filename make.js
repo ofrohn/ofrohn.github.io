@@ -83,6 +83,17 @@ cp('-fR', '../seh/doc/*', 'seh-doc');
 
 echo('Done');
 
+echo('Copying tisserand');
+
+cp('-f', [
+  '../Tisserand-parameter/tisserand.html',
+  '../Tisserand-parameter/readme.md'
+], './');
+
+mv('-f', 'readme.md', 'tisserand-readme.md');
+
+echo('Done');
+
 ls('*.html', 'celestial-demo/*.html', 'seh-doc/*.html', 'threex-planets-demo/*.html').forEach(function (file) {
   if (grep('UA-105720254-1', file).length > 1) return;
   sed('-i', '</body>', ga + '\n</body>', file);
