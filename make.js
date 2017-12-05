@@ -62,7 +62,7 @@ cp('-f', '../threex.planets/lib/threex.planets.js', 'lib');
 cp('-f', '../threex.planets/lib/planetary.js', 'lib');
 cp('-f', '../threex.planets/data/moons.js', 'data');
 cp('-f', '../threex.planets/examples/*.*', 'threex-planets-demo');
-sed('-i', '../images/', '../images/maps/', 'lib/threex.planets.js');
+//sed('-i', '../images/maps/', '../images/maps/', 'lib/threex.planets.js');
 
 echo('Copying seh');
 
