@@ -16,10 +16,9 @@
 </style>
 </head><body>
 <script src="lib/d3.v4.js"></script>
+<div><div id="d3graph"></div></div>
 <script>
 /* http://www2.ess.ucla.edu/~jewitt/tisserand.html 
-  planet point
-  adaptive y-axis
 */
 
 // set the dimensions and margins of the graph
@@ -113,7 +112,7 @@ function update(data) {
   vlines.append("path")
     .attr("class", "line")
     .attr("d",  function(d) { return valueline(d.values); })
-    .style("stroke", function(d) { return "#f60"; });
+    .style("stroke", function(d) { return "#fc0"; });
 /*
   vlines.append("text")
       .datum(function(d) { return {id: d.id, value: d.values[0]}; })
@@ -132,6 +131,7 @@ function update(data) {
     .attr("cy", function(d) { return y(d.y) })
     .attr("r", 5)
     .style("fill", "white")
+    .style("stroke-width", "2.0")
     .style("stroke", "#f00");
   
   // Add the X Axis
