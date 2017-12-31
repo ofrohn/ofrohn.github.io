@@ -81,12 +81,11 @@ mv('-f', 'readme.md', 'seh-doc/readme.md');
 cp('-fR', '../seh/images/*', 'images');
 cp('-fR', '../seh/doc/*', 'seh-doc');
 
-echo('Done');
-
 echo('Copying tisserand');
 
 cp('-f', [
   '../Tisserand-parameter/tisserand.html',
+  '../Tisserand-parameter/tisserand.js',
   '../Tisserand-parameter/readme.md'
 ], './');
 
