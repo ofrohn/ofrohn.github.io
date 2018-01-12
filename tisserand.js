@@ -85,6 +85,9 @@ ctrl.append("input").attr("type", "button").attr("value", "Neptune").attr("id", 
   setPlanet(this.id); update(generate(selected[0]));
 });
 
+ctrl.append("div").attr("id", "formula");
+$("formula").innerHTML = "<math display='block' xmlns='http://www.w3.org/1998/Math/MathML' mode='inline' mathsize='small'><msub><mi>T</mi><mi>p</mi></msub><mo>=</mo><mfrac><mi class='frm' id='f_ap'>ap</mi><mi class='frm' id='f_a'>a</mi></mfrac> <mo>+</mo><mn>2</mn><msqrt><mfrac><mi class='frm' id='f_a'>a</mi><mi class='frm' id='f_ap'>ap</mi></mfrac><mo>(</mo><mn>1</mn><mo>-</mo> <msup><mi class='frm' id='f_e'>e</mi><mn>2</mn></msup><mo>)</mo></msqrt><mo>cos</mo> <mi class='frm' id='f_i'>i</mi></math>";
+
 hilight();
 update(generate());
 
@@ -145,10 +148,10 @@ function update(data) {
     .attr("y", 0)
     .attr("dy", "-1.5em")
     .attr("transform", "rotate(-90)")
-    .text("Tisserand parameter Tj");
+    .text("Tisserand parameter T" + planet);
   
   $("lblSecond").innerHTML = getValue(selected[1], "second");
-  $("lblThird").innerHTML = getValue(selected[2], "third");;
+  $("lblThird").innerHTML = getValue(selected[2], "third");
 }
 
 function setPlanet(id) {
@@ -182,6 +185,15 @@ function generate() {
   
   curr[selected[1]] = adapt(selected[1], "second");
   curr[selected[2]] = adapt(selected[2], "third");
+
+  document.querySelectorAll('.frm').forEach(function(e) {
+    switch (e.id) {
+      case "f_ap": e.innerHTML = ap[planet].a + "\u2009AU"; break;
+      case "f_a":  if (selected[0] !== "a") e.innerHTML = curr.a + "\u2009AU"; else e.innerHTML = "a"; break;
+      case "f_e":  if (selected[0] !== "e") e.innerHTML = curr.e; else e.innerHTML = "e"; break;
+      case "f_i":  if (selected[0] !== "i") e.innerHTML = Round(curr.i*180/Math.PI, 3) + "\u2009\u00b0"; else e.innerHTML = "i"; break;
+    }
+  });
   
   for (var i=l.min; i<l.max; i+=(l.max-l.min)/100) {
     curr[selected[0]] = i;
