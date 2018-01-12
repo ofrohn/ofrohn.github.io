@@ -3,16 +3,13 @@
 <meta charset="utf-8">
 <title>Tisserand parameter</title>
 <style>
-.line {
-  fill: none;
-  stroke: steelblue;
-  stroke-width: 2px;
-}
+ .line { fill: none; stroke: steelblue; stroke-width: 2px; }
  input[type=button] { display:inline-block; border: 3px double #000; border-radius: 13px; height:26px; background:#f7f7f7; margin: 4px 8px 0 0; }
- 
- input[type=button], label { font: bold 14px monospace; }
- 
+ input[type=button], label { font: bold 14px monospace; } 
  input.selected { background:#d0e0ff; }
+ .ctrl { position:relative; }
+ #formula { display:inline-block; position:absolute; top:-110px; right:10px; border: 0px solid #f00; z-index:100; }
+
 </style>
 </head><body>
 <script src="lib/d3.v4.js"></script>
