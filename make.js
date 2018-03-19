@@ -86,6 +86,8 @@ echo('Copying tisserand');
 cp('-f', [
   '../Tisserand-parameter/tisserand.html',
   '../Tisserand-parameter/tisserand.js',
+  '../Tisserand-parameter/tisserand2.html',
+  '../Tisserand-parameter/tisserand2.js',
   '../Tisserand-parameter/readme.md'
 ], './');
 
