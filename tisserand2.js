@@ -21,10 +21,29 @@ var margin = {top: 20, right: 20, bottom: 30, left: 50},
       i: {min: 0, max: Math.PI, def: 0.1, y0:-2.5, y1:6.5, unit:"\u00b0"} // inclination 0...Pi rad
     },
     selected = ["a", "e", "i"],
-    palette1 = ["#004529","#006837","#238443","#41ab5d","#78c679","#addd8e","#d9f0a3","#f7fcb9","#ffffd5"];
-    palette2 = ["#e7f7ff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#08519c","#08306b"];
+    palette1 = ["#004529","#006837","#238443","#41ab5d","#78c679","#addd8e","#d9f0a3","#f7fcb9","#ffffd5"],
+    palette2 = ["#e7f7ff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#08519c","#08306b"],
 
-var parnt = "body", node = $("tisserand-chart")
+    palG = {
+      3: ["#f7fcb9","#addd8e","#31a354"],
+      4: ["#ffffcc","#c2e699","#78c679","#238443"],
+      5: ["#ffffcc","#c2e699","#78c679","#31a354","#006837"],
+      6: ["#ffffcc","#d9f0a3","#addd8e","#78c679","#31a354","#006837"],
+      7: ["#ffffcc","#d9f0a3","#addd8e","#78c679","#41ab5d","#238443","#005a32"],
+      8: ["#ffffe5","#f7fcb9","#d9f0a3","#addd8e","#78c679","#41ab5d","#238443","#005a32"],
+      9: ["#ffffe5","#f7fcb9","#d9f0a3","#addd8e","#78c679","#41ab5d","#238443","#006837","#004529"]
+    },
+    palB = {
+      3: ["#deebf7","#9ecae1","#3182bd"],
+      4: ["#eff3ff","#bdd7e7","#6baed6","#2171b5"],
+      5: ["#eff3ff","#bdd7e7","#6baed6","#3182bd","#08519c"],
+      6: ["#eff3ff","#c6dbef","#9ecae1","#6baed6","#3182bd","#08519c"],
+      7: ["#eff3ff","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#084594"],
+      8: ["#f7fbff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#084594"],
+      9: ["#f7fbff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#08519c","#08306b"]
+    };
+    
+var parnt = "body", node = $("tisserand-chart");
 
 if (node) {
   parnt = "#tisserand-chart";
@@ -119,27 +138,26 @@ hilight();
 update(generate());
 
 function update(data) {
-  var dim = { w: width/step+1, h: height/step+1, dx: 0, dy: height/step}
+  var dim = { w: width/step+1, h: height/step+1}
   g.selectAll("*").remove();
   
   data.values.forEach(function(d, i) {
     ctx.beginPath();
-    ctx.rect(x(d.x), y(d.y) - dim.dy, dim.w, dim.h);
+    ctx.rect(x(d.x), y(d.y) - dim.h, dim.w, dim.h);
     ctx.fillStyle = heatColor(d.t);
     ctx.fill();
     ctx.closePath();
   });
 
-  g.selectAll("circle")
-    .data(generatePlanet())
-    .enter().append("circle")
-    .attr("class", "dot")
-    .attr("cx", function(d) { return x(d.x) })
-    .attr("cy", function(d) { return y(d.y) })
-    .attr("r", 5)
-    .style("fill", "white")
-    .style("stroke-width", "2.0")
-    .style("stroke", "#f00");
+  var pdata = generatePlanet()[0];
+  ctx.beginPath();
+  ctx.arc(x(pdata.x), y(pdata.y), 5, 0, Math.PI*2, true);
+  ctx.fillStyle = "#fff";
+  ctx.fill();
+  ctx.lineWidth = 2.0;
+  ctx.strokeStyle = "#f00";
+  ctx.stroke();
+  ctx.closePath();
   
   // Add the X Axis
   g.append("g")
@@ -187,6 +205,7 @@ function update(data) {
     sctx.closePath();
   };
   var diff = Math.round((sx.range()[1] - sx.range()[0]) / 5);
+  if (diff <= 0) diff = 1;
   for (var i = Math.ceil(sx.range()[0]); i<=Math.floor(sx.range()[1]); i+=diff) {
     sctx.fillStyle = "#000";
     sctx.fillText(i, sx.invert(i), 26);
@@ -264,8 +283,13 @@ function generate() {
   else
     y.domain([l1.min, l1.max]);
   
-  z1.domain([d3.min(res.values, function(c) { return c.t; }), 3]);
-  z2.domain([3, d3.max(res.values, function(c) { return c.t; })]);
+  var min = d3.min(res.values, function(c) { return c.t; }),
+      max = d3.max(res.values, function(c) { return c.t; }),
+      rmin = (3 - min)/(max - min); 
+      rmax = (max - 3)/(max - min); 
+      
+  z1.domain([min, 3]);
+  z2.domain([3, max]);
   
   return res;
 }
@@ -280,10 +304,10 @@ function generatePlanet() {
       tiss, p = planet;
   
   tiss = tisserand(ap[p]);
-  if (selected[0] === "i")
-    res.push({x:ap[p].i * 180/Math.PI, y:tiss});
+  if (selected[1] === "i")
+    res.push({x:ap[p][selected[0]], y:ap[p].i * 180/Math.PI, t:tiss});
   else
-    res.push({x:ap[p][selected[0]], y:tiss});
+    res.push({x:ap[p][selected[0]], y:ap[p][selected[1]], t:tiss});
 
   return res;
 }
