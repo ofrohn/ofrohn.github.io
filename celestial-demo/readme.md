@@ -13,7 +13,8 @@ __Demos__:
 [Setting time/location](http://ofrohn.github.io/celestial-demo/location.html) and see the current sky  
 [Animated planets](http://ofrohn.github.io/celestial-demo/planets-animation.html) moving about the ecliptic  
 [Starry sky](http://ofrohn.github.io/celestial-demo/sky.html) just the stars  
-\([Sources](./demo/)\)  
+[Summer triangle](http://ofrohn.github.io/celestial-demo/triangle.html) adding data
+\([Source files on github](./demo/)\)  
 
 __Some more examples__:  
 [Embedded interactive form](http://armchairastronautics.blogspot.com/p/skymap.html)  
@@ -337,7 +338,7 @@ var jsonLine = {
 }; 
 ```
 
-As you can see, this defines the Summer Triangle asterism, consisting of the bright stars Vega (? Lyr), Deneb (? Cyg) and Altair (? Aql).  
+As you can see, this defines the Summer Triangle asterism, consisting of the bright stars Vega (Alpha Lyr), Deneb (Alpha Cyg) and Altair (Alpha Aql).  
 
 You also need to define how the triangle is going to look like with some styles (see above):  
 
