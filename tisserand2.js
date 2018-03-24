@@ -34,15 +34,16 @@ var margin = {top: 20, right: 20, bottom: 30, left: 50},
       9: ["#ffffe5","#f7fcb9","#d9f0a3","#addd8e","#78c679","#41ab5d","#238443","#006837","#004529"]
     },
     palB = {
-      3: ["#deebf7","#9ecae1","#3182bd"],
-      4: ["#eff3ff","#bdd7e7","#6baed6","#2171b5"],
-      5: ["#eff3ff","#bdd7e7","#6baed6","#3182bd","#08519c"],
-      6: ["#eff3ff","#c6dbef","#9ecae1","#6baed6","#3182bd","#08519c"],
-      7: ["#eff3ff","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#084594"],
-      8: ["#f7fbff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#084594"],
-      9: ["#f7fbff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#08519c","#08306b"]
+      3: ["#cee7f7","#9ecae1","#3182bd"],
+      4: ["#dfe3ff","#bdd7e7","#6baed6","#2171b5"],
+      5: ["#dfecff","#bdd7e7","#6baed6","#3182bd","#08519c"],
+      6: ["#dfecff","#c6dbef","#9ecae1","#6baed6","#3182bd","#08519c"],
+      7: ["#dfecff","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#084594"],
+      8: ["#e7f7ff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#084594"],
+      9: ["#e7f7ff","#deebf7","#c6dbef","#9ecae1","#6baed6","#4292c6","#2171b5","#08519c","#08306b"]
     };
     
+for (var n in palG) { palG[n].reverse(); }
 var parnt = "body", node = $("tisserand-chart");
 
 if (node) {
@@ -59,8 +60,8 @@ var chart = d3.select(parnt).append("canvas").attr("id", "dataplane")
 // set the ranges
 var x = d3.scaleLinear().range([0, width]),
     y = d3.scaleLinear().range([height, 0]),
-    z1 = d3.scaleQuantize().range(palette1),
-    z2 = d3.scaleQuantize().range(palette2);
+    z1 = d3.scaleQuantize().range(palG[9]),
+    z2 = d3.scaleQuantize().range(palB[9]);
 
 
 var svg = d3.select(parnt).append("svg")
@@ -285,18 +286,40 @@ function generate() {
   
   var min = d3.min(res.values, function(c) { return c.t; }),
       max = d3.max(res.values, function(c) { return c.t; }),
-      rmin = (3 - min)/(max - min); 
-      rmax = (max - 3)/(max - min); 
-      
-  z1.domain([min, 3]);
-  z2.domain([3, max]);
+      rLo = Math.abs((3 - min)/(max - min)),
+      rHi = Math.abs((max - 3)/(max - min)); 
   
+  if (min > 3) {
+    z1.domain([min, min]);
+    z2.domain([min, max]);
+    z2.range(palB[9]);
+  } else if (max < 3) {
+    z1.domain([min, max]);
+    z2.domain([max, max]);
+    z1.range(palG[9]);
+  } else {
+    z1.domain([min, 3]);
+    z2.domain([3, max]);
+    z1.range(palG[colorRange(rLo)]);
+    z2.range(palB[colorRange(rHi)]);
+    
+  }
   return res;
 }
 
 function heatColor(v) {
    if (v < 3) return z1(v);  
    return z2(v);
+}
+
+function colorRange(v) {
+  if (v > 0.6) return 9;
+  if (v > 0.5) return 8;
+  if (v > 0.45) return 7;
+  if (v > 0.4) return 6;
+  if (v > 0.35) return 5;
+  if (v > 0.25) return 4;
+  return 3;  
 }
  
 function generatePlanet() {
