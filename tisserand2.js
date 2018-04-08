@@ -128,8 +128,10 @@ chart.on('mousemove', function() {
   param[selected[0]] = x.invert(mx);
   param[selected[1]] = selected[1] === "i" ? y.invert(my) * Math.PI/180 : y.invert(my);
   param[selected[2]] = $("third").value * 1;
-  tiss = tisserand(param);
-  d3.select("#indicator").text(Round(tiss, 2)).style("top", px(my + 4)).style("left", px(mx + margin.left + 14));
+  var  Q = param.a * (1 + param.e), q = param.a * (1 - param.e),
+       tiss = tisserand(param);
+  var txt = "T" + planet + " " + Round(tiss, 2) + ", " + Round(q, 2) + "..." + Round(Q, 2) + "AU";
+  d3.select("#indicator").text(txt).style("top", px(my + 4)).style("width", px(120)).style("left", px(mx + margin.left + 14));
 });
 
 chart.on('mouseover', function() { d3.select("#indicator").style("display", "block"); });
