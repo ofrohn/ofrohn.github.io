@@ -291,6 +291,8 @@ function generate() {
       rLo = Math.abs((3 - min)/(max - min)),
       rHi = Math.abs((max - 3)/(max - min)); 
   
+  //if (planet !== "j") max = 6;
+  
   if (min > 3) {
     z1.domain([min, min]);
     z2.domain([min, max]);
