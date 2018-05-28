@@ -26,15 +26,12 @@ cp('-f', [
   '../asteroid-families/asteroids.js', 
   '../asteroid-families/asteroids.min.js', 
   '../asteroid-families/readme.md', 
-  '../asteroid-families/style.css',
+  '../asteroid-families/asteroids.css',
   '../asteroid-families/viewer.html'
 ], './');
 
 mv('-f', 'readme.md', 'asteroids-readme.md');
-mv('-f', 'style.css', 'asteroids.css');
 mv('-f', 'viewer.html', 'asteroids-viewer.html');
-
-sed('-i', 'style.css', 'asteroids.css', 'asteroids-viewer.html');
 
 cp('-f', '../asteroid-families/data/*', 'data');
 
