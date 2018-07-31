@@ -48,6 +48,8 @@ var config = {
   interactive: true,  // Enable zooming and rotation with mousewheel and dragging
   form: true,         // Display form for interactive settings
   location: false,    // Display location settings (no center setting on form)
+  daterange: [],      // Calender date range; null: displaydate-+10; [n<100]: displaydate-+n; [yr]: yr-+10; 
+                      // [yr, n<100]: [yr-n, yr+n]; [yr0, yr1]  
   controls: true,     // Display zoom controls
   lang: "",           // Language for names, so far only for constellations: 
                       // de: german, es: spanish. Default:en or empty string for english
@@ -59,7 +61,7 @@ var config = {
     colors: true,  // Show stars in spectral colors, if not use default color
     style: { fill: "#ffffff", opacity: 1 }, // Style for stars
     names: true,   // Show star designation (Bayer, Flamsteed, Variable star, Gliese, 
-                      whichever applies first in that order)
+                    //  whichever applies first in that order)
     proper: false, // Show proper name (if one exists)
     desig: false,  // Show all designations, including Draper and Hipparcos
     namelimit: 2.5,  // Show only names/designations for stars brighter than namelimit
@@ -148,7 +150,7 @@ var config = {
     boundstyle: { stroke: "#cccc00", width: 0.5, opacity: 0.8, dash: [2, 4] }
   },  
   mw: {
-    show: true     // Show Milky Way as filled multi-polygon outlines 
+    show: true,     // Show Milky Way as filled multi-polygon outlines 
     style: { fill: "#ffffff", opacity: 0.15 }  // Style for MW layers
   },
   lines: {  // Display & styles for graticule & some planes
@@ -340,6 +342,12 @@ var jsonLine = {
 ```
 
 As you can see, this defines the Summer Triangle asterism, consisting of the bright stars Vega (Alpha Lyr), Deneb (Alpha Cyg) and Altair (Alpha Aql).  
+*Note:* Since astronomical data is usually given in right ascension from 0 to 24 h and the geoJSON-format used in D3 expects positions in degrees from -180 to 180 deg, you may need this function to convert your data first:  
+```js
+function hour2degree(ra) { 
+  return ra > 12 ? (ra - 24) * 15 : ra * 15;
+}
+```  
 
 You also need to define how the triangle is going to look like with some styles (see above):  
 
@@ -451,7 +459,7 @@ __Sources__
 * \[7\] [Saguaro Astronomy Club Asterisms](http://www.saguaroastro.org/content/downloads.htm) \(scroll down\)  
 * \[8\] [Messier Objects with Data](http://messier.seds.org/data.html), H.Frommert/seds.org  
 * \[9\] [Keplerian Elements for Approximate Positions of the Major Planets](https://ssd.jpl.nasa.gov/?planet_pos)  
-All data converted to GeoJSON at J2000 epoch, positions converted from 0...24h right ascension to -180...180 degrees longitude as per GeoJSON requirements, 0...12h -> 0...180º; 12...24h -> -180...0º
+All data converted to GeoJSON at J2000 epoch, positions converted from 0...24h right ascension to -180...180 degrees longitude as per GeoJSON requirements, so 0...12h becomes 0...180 degrees, and 12...24h becomes -180...0 degrees, since 0 has to stay 0.  
 
 __Other files__
 
