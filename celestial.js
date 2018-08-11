@@ -1,7 +1,7 @@
 // Copyright 2015 Olaf Frohn https://github.com/ofrohn, see LICENSE
 !(function() {
 var Celestial = {
-  version: '0.6.6',
+  version: '0.6.7',
   container: null,
   data: []
 };
@@ -83,17 +83,18 @@ Celestial.display = function(config) {
   setClip(proj.clip);
 
   d3.select(window).on('resize', resize);
-
+  d3.select(par).on('dblclick', function () { zoomBy(1.5625); return false; });
+ 
   if (cfg.controls === true && $("celestial-zoomin") === null) {
-    d3.select(par).append("input").attr("type", "button").attr("id", "celestial-zoomin").attr("value", "\u002b").on("click", function () { zoomBy(1.111); });
-    d3.select(par).append("input").attr("type", "button").attr("id", "celestial-zoomout").attr("value", "\u2212").on("click", function () { zoomBy(0.9); });
+    d3.select(par).append("input").attr("type", "button").attr("id", "celestial-zoomin").attr("value", "\u002b").on("click", function () { zoomBy(1.25); return false; });
+    d3.select(par).append("input").attr("type", "button").attr("id", "celestial-zoomout").attr("value", "\u2212").on("click", function () { zoomBy(0.8); return false; });
   }
   
   if (cfg.location === true) {
     circle = d3.geo.circle().angle([90]);  
     container.append("path").datum(circle).attr("class", "horizon");
     if ($("loc") === null) geo(cfg);
-    else rotate({center:Celestial.zenith()});
+    else if (cfg.follow === "zenith") rotate({center:Celestial.zenith()});
     fldEnable("horizon-show", proj.clip);
   }
   
@@ -1071,6 +1072,17 @@ Celestial.add = function(dat) {
   Celestial.data.push(res);
 };
 
+Celestial.remove = function(i) {
+  if (i !== null && i < Celestial.data.length) {
+    return Celestial.data.splice(i,1);
+  }
+};
+
+Celestial.clear = function() {
+  Celestial.data = [];
+};
+
+
 //load data and transform coordinates
 
 
@@ -1248,13 +1260,14 @@ var settings = {
   center: null,       // Initial center coordinates in equatorial transformation [hours, degrees, degrees], 
                       // otherwise [degrees, degrees, degrees], 3rd parameter is orientation, null = default center
   geopos: null,       // optional initial geographic position [lat,lon] in degrees, overrides center
+  follow: "zenith",   // on which coordinates to center the map, default: zenith, if location enabled, otherwise center
   orientationfixed: true,  // Keep orientation angle the same as center[2]
   adaptable: true,    // Sizes are increased with higher zoom-levels
   interactive: true,  // Enable zooming and rotation with mousewheel and dragging
   form: false,        // Display settings form
   location: false,    // Display location settings
-  daterange: [],  // Calender date range; null: displaydate-+10; [yr]: yr-+10; [yr, n<100]: [yr-n, yr+n]; [yr0, yr1]
-  fullwidth: false,   // Display fullwidth button
+  daterange: [],      // Calender date range; null: displaydate-+10; [n<100]: displaydate-+n; [yr]: yr-+10; 
+                      // [yr, n<100]: [yr-n, yr+n]; [yr0, yr1]
   controls: true,     // Display zoom controls
   lang: "",           // Language for names, so far only for constellations: de: german, es: spanish
                       // Default:en or empty string for english
@@ -2334,9 +2347,13 @@ function geo(cfg) {
   var col = frm.append("div").attr("class", "col").attr("id", "location");
   //Latitude & longitude fields
   col.append("label").attr("title", "Location coordinates long/lat").attr("for", "lat").html("Location");
-  col.append("input").attr("type", "number").attr("id", "lat").attr("title", "Latitude").attr("placeholder", "Latitude").attr("max", "90").attr("min", "-90").attr("step", "0.0001").attr("value", geopos[0]).on("change",  function () { if (testNumber(this) === true) go(); });
+  col.append("input").attr("type", "number").attr("id", "lat").attr("title", "Latitude").attr("placeholder", "Latitude").attr("max", "90").attr("min", "-90").attr("step", "0.0001").attr("value", geopos[0]).on("change",  function () {
+    if (testNumber(this) === true) go(); 
+  });
   col.append("span").html("\u00b0");
-  col.append("input").attr("type", "number").attr("id", "lon").attr("title", "Longitude").attr("placeholder", "Longitude").attr("max", "180").attr("min", "-180").attr("step", "0.0001").attr("value", geopos[1]).on("change",  function () { if (testNumber(this) === true) go(); });
+  col.append("input").attr("type", "number").attr("id", "lon").attr("title", "Longitude").attr("placeholder", "Longitude").attr("max", "180").attr("min", "-180").attr("step", "0.0001").attr("value", geopos[1]).on("change",  function () { 
+    if (testNumber(this) === true) go(); 
+  });
   col.append("span").html("\u00b0");
   //Here-button if supported
   if ("geolocation" in navigator) {
@@ -2344,14 +2361,22 @@ function geo(cfg) {
   }
   //Datetime field with dtpicker-button
   col.append("label").attr("title", "Local date/time").attr("for", "datetime").html(" Date/time");
-  col.append("input").attr("type", "button").attr("id", "day-left").attr("title", "One day back").on("click", function () { date.setDate(date.getDate() - 1); $("datetime").value = dateFormat(date, zone); go(); });
+  col.append("input").attr("type", "button").attr("id", "day-left").attr("title", "One day back").on("click", function () {
+    date.setDate(date.getDate() - 1); 
+    $("datetime").value = dateFormat(date, zone); 
+    go(); 
+  });
   col.append("input").attr("type", "text").attr("id", "datetime").attr("title", "Date and time").attr("value", dateFormat(date, zone))
   .on("click", showpick, true).on("input", function () { 
     this.value = dateFormat(date, zone); 
     if (!dtpick.isVisible()) showpick(); 
   });
   col.append("div").attr("id", "datepick").on("click", showpick);
-  col.append("input").attr("type", "button").attr("id", "day-right").attr("title", "One day forward").on("click", function () { date.setDate(date.getDate() + 1); $("datetime").value = dateFormat(date, zone); go(); });
+  col.append("input").attr("type", "button").attr("id", "day-right").attr("title", "One day forward").on("click", function () { 
+    date.setDate(date.getDate() + 1); 
+    $("datetime").value = dateFormat(date, zone); 
+    go(); 
+  });
   //Now -button sets current time & date of device  
   col.append("input").attr("type", "button").attr("value", "Now").attr("id", "now").on("click", now);
   //Horizon marker
@@ -2412,7 +2437,11 @@ function geo(cfg) {
       geopos = [parseFloat(lat), parseFloat(lon)];
       zenith = Celestial.getPoint(horizontal.inverse(dtc, [90, 0], geopos), cfg.transform);
       zenith[2] = 0;
-      Celestial.rotate({center:zenith, horizon:cfg.horizon});
+      if (cfg.follow === "zenith") {
+        Celestial.rotate({center:zenith, horizon:cfg.horizon});
+      } else {
+        Celestial.apply({horizon:cfg.horizon});
+      }
     }
   }
 
@@ -2835,7 +2864,7 @@ var Kepler = function () {
   
     
   function observer(pos) {
-    var flat = 298.257223563,    // WGS84 flatening of earth
+    var flat = 298.257223563,    // WGS84 flattening of earth
         re = 6378.137,           // GRS80/WGS84 semi major axis of earth ellipsoid
         h = pos.h || 0,
         cart = {},
@@ -3699,12 +3728,14 @@ d3.geo.zoom = function() {
           dispatch = event.of(this, arguments),
           view1 = view,
           transition = d3.transition(g);
+     
       if (transition !== g) {
         transition
             .each("start.zoom", function() {
               if (this.__chart__) { // pre-transition state
                 view = this.__chart__;
-              }
+                if (!view.hasOwnProperty("r")) view.r = projection.rotate();
+              } 
               projection.rotate(view.r).scale(view.k);
               zoomstarted(dispatch);
             })
