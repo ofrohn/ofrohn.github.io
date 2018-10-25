@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Supernova Remnants</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <style type="text/css">
+  </style>  
+</head><body>
+  <script type="text/javascript" src="../lib/d3.min.js"></script>
+  <script type="text/javascript" src="../lib/d3.geo.projection.min.js"></script>
+  <script type="text/javascript" src="../celestial.js"></script>
+  <link rel="stylesheet" href="../celestial.css">
+
+<div style="overflow:hidden;margin:0 auto;"><div id="celestial-map"></div></div>
+<div id="celestial-form"></div>
+
+
+<script type="text/javascript">
+
+// Some prettifying styles
+var config = { 
+  projection: "aitoff", 
+  transform: "galactic",
+  //center: [-65, 0],
+  background: { fill: "#fff", stroke: "#000", opacity: 1, width: 1 },
+  datapath: "https://ofrohn.github.io/data/",
+  stars: { 
+    colors: false, 
+    names: false, 
+    style: { fill: "#000", opacity:1 }, 
+    limit: 6, 
+    size: 5 
+  },
+  dsos: { show: false, size: 10 },
+  mw: { 
+    style: { fill:"#996", opacity: 0.1 } 
+  },
+};
+
+
+// Asterisms canvas style properties for lines and text
+var pointStyle = { 
+      stroke: "rgba(255, 0, 204, 1)", 
+      fill: "rgba(255, 0, 204, 0.15)"
+    },
+    textStyle = { 
+      fill:"rgba(255, 0, 204, 1)", 
+      font: "15px Helvetica, Arial, sans-serif", 
+      align: "left", 
+      baseline: "bottom" 
+    };
+
+// JSON structure of the object to be displayed, in this case 
+// the Summer Triangle between Vega, Deneb and Altair
+var jsonSnr = {
+  "type":"FeatureCollection",
+  // this is an array, add as many objects as you want
+  "features":[
+    {"type":"Feature",
+     "id":"SomeDesignator",
+     "properties": {
+       // Name
+       "name":"Some Name",
+       // Size in arcminutes
+       "dim": 10
+     }, "geometry":{
+       // the line object as an array of point coordinates
+       "type":"Point",
+       "coordinates": [-80.7653, 38.7837]
+     }
+    }  
+  ]};
+  
+
+Celestial.add({type:"json", file:"https://ofrohn.github.io/data/dsos.20.json", callback: function(error, json) {
+  if (error) return console.warn(error);
+  // Load the geoJSON file and transform to correct coordinate system, if necessary
+  var dsos = Celestial.getData(json, config.transform);
+
+  // Add to celestiasl objects container in d3
+  Celestial.container.selectAll(".snrs")
+    .data(dsos.features.filter(function(d) {
+      return d.properties.type === 'snr'
+    }))
+    .enter().append("path")
+    .attr("class", "snr"); 
+  // Trigger redraw to display changes
+  Celestial.redraw();
+}, redraw: function() {
+  // Select the added objects by class name as given previously
+  Celestial.container.selectAll(".snr").each(function(d) {
+    // If point is visible (this doesn't work automatically for points)
+    if (Celestial.clip(d.geometry.coordinates)) {
+      // get point coordinates
+      var pt = Celestial.mapProjection(d.geometry.coordinates);
+      // object radius in pixel, could be varable depending on e.g. magnitude
+      var r = Math.pow(parseInt(d.properties.dim) * 0.25, 0.5);
+   
+      //Celestial.setStyle(pointStyle);
+      // draw on canvas
+      //var r = Celestial.dsoSymbol(d, pt);
+      // Set line styles
+      Celestial.setStyle(pointStyle);
+      Celestial.context.beginPath();
+      Celestial.context.arc(pt[0], pt[1], r, 0, 2 * Math.PI);
+      Celestial.context.closePath();
+      Celestial.context.stroke();
+      Celestial.context.fill();     
+
+      // Set text styles       
+      Celestial.setTextStyle(textStyle);
+      // and draw text on canvas
+      Celestial.context.fillText(d.properties.name, pt[0]+r, pt[1]+r);
+    }      
+  }); 
+}});
+
+Celestial.display(config);
+    
+</script>
+ 
+<footer id="d3-celestial-footer">
+<p><a href="https://github.com/ofrohn/d3-celestial"><b>D3-Celestial</b></a> released under <a href="http://opensource.org/licenses/BSD-3-Clause">BSD license</a>. Copyright 2015-18 <a href="http://armchairastronautics.blogspot.com/" rel="author">Olaf Frohn</a>.
+</p></footer> 
+ <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');ga('create', 'UA-105720254-1', 'auto');ga('send', 'pageview');</script>
+</body>
+</html>
