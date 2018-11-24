@@ -511,7 +511,8 @@ callback: function(error, json) {
     .attr("class", "snr"); 
   // Trigger redraw to display changes
   Celestial.redraw();
-}```
+}
+```
 
 However you add the data, as long as the receive the same class name - 'snr' in the examples above - the display method is the same, as shown below. 
 
@@ -557,7 +558,7 @@ Now follows the actual painting: set the styles (fill color, stroke color & widt
 Celestial.display();
 ```
 
-Finally, the whole map can be displaye. The complete sample code is in the file [snr.html](demo/snr.html) in the demo folder
+Finally, the whole map can be displayed. The complete sample code is in the file [snr.html](demo/snr.html) in the demo folder
 
 
 ### Files
