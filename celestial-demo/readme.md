@@ -13,13 +13,8 @@ __Demos__:
 [Setting time/location](http://ofrohn.github.io/celestial-demo/location.html) and see the current sky  
 [Animated planets](http://ofrohn.github.io/celestial-demo/planets-animation.html) moving about the ecliptic  
 [Starry sky](http://ofrohn.github.io/celestial-demo/sky.html) just the stars  
-<<<<<<< HEAD
 [Summer triangle](http://ofrohn.github.io/celestial-demo/triangle.html) adding data  
 [Supernova remnants](http://ofrohn.github.io/celestial-demo/snr.html) adding point data  
-=======
-[Summer triangle](http://ofrohn.github.io/celestial-demo/triangle.html) adding data
-[Supernova remnants](http://ofrohn.github.io/celestial-demo/snr.html) adding point data
->>>>>>> 44ddb1375ce756b4a4dc774df84ceb00b9b3ad9d
 \([Source files on github](./demo/)\)  
 
 __Some more examples__:  
