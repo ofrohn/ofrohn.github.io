@@ -1,7 +1,7 @@
 // Copyright 2015 Olaf Frohn https://github.com/ofrohn, see LICENSE
 !(function() {
 var Celestial = {
-  version: '0.6.11',
+  version: '0.6.12',
   container: null,
   data: []
 };
@@ -42,6 +42,7 @@ Celestial.display = function(config) {
    
   var margin = [16, 16],
       width = getWidth(),
+      pixelRatio = window.devicePixelRatio || 1,
       proj = getProjection(cfg.projection);
   if (cfg.lines.graticule.lat && cfg.lines.graticule.lat.pos[0] === "outline") proj.scale -= 2;
   
