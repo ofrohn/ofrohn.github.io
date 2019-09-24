@@ -1,4 +1,4 @@
-// Copyright 2015 Olaf Frohn https://github.com/ofrohn, see LICENSE
+// Copyright 2015-2019 Olaf Frohn https://github.com/ofrohn, see LICENSE
 !(function() {
 var Celestial = {
   version: '0.6.15',
@@ -101,7 +101,7 @@ Celestial.display = function(config) {
   circle = d3.geo.circle().angle([90]);  
   container.append("path").datum(circle).attr("class", "horizon");
   if ($("loc") === null) geo(cfg);
-  else if (cfg.follow === "zenith") rotate({center: Celestial.zenith()});
+  else if (cfg.location === true && cfg.follow === "zenith") rotate({center: Celestial.zenith()});
 
   if (cfg.location === true) {
     d3.select("#location").style("display", "inline-block");
@@ -2546,6 +2546,12 @@ function geo(cfg) {
   Celestial.position = function () { return geopos; };
   Celestial.location = function (loc) {
     if (!loc || loc.length < 2) return geopos;
+    if (isValidLocation(cfg.location)) {
+      geopos = cfg.location.slice();
+      $("lat").value = geopos[0];
+      $("lon").value = geopos[1];
+      go();
+    }
   };
   //{"date":dt, "location":loc}
   Celestial.skyview = function (cfg) {
