@@ -187,7 +187,6 @@ Celestial.display = function(config) {
         //$("constellation").firstChild.disabled = true;
       }
       Celestial.constellations = l;
-      redraw();
     });
 
     //Constellation boundaries
@@ -224,7 +223,6 @@ Celestial.display = function(config) {
          .data(st.features)
          .enter().append("path")
          .attr("class", "star");
-      redraw();
     });
 
     //Deep space objects
@@ -237,7 +235,6 @@ Celestial.display = function(config) {
          .data(ds.features)
          .enter().append("path")
          .attr("class", "dso" );
-      redraw();
     });
 
     //Planets, Sun & Moon
@@ -250,7 +247,6 @@ Celestial.display = function(config) {
          .data(pl)
          .enter().append("path")
          .attr("class", "planet");
-      redraw();
     });
 
     if (Celestial.data.length > 0) { 
@@ -556,7 +552,7 @@ Celestial.display = function(config) {
       });
     }
 
-    if (cfg.location && cfg.transform === "equatorial" && cfg.planets.show) { 
+    if (cfg.location && cfg.transform === "equatorial" && cfg.planets.show && Celestial.origin) { 
       var dt = Celestial.date(),
           o = Celestial.origin(dt).spherical();
       container.selectAll(".planet").each(function(d) {
