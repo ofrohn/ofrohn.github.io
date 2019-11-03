@@ -1,7 +1,7 @@
 // Copyright 2015-2019 Olaf Frohn https://github.com/ofrohn, see LICENSE
 !(function() {
 var Celestial = {
-  version: '0.6.15',
+  version: '0.6.16',
   container: null,
   data: []
 };
@@ -1154,6 +1154,18 @@ function getPlanets(d) {
 }
 
 
+function getPlanet(id, dt) {
+  dt = dt || Celestial.date();
+  var o = Celestial.origin(dt).spherical(), res;
+     
+  Celestial.container.selectAll(".planet").each(function(d) {
+    if (id === d.id()) {
+      res = d(dt).equatorial(o);
+    }
+  });
+  return res;
+}
+
 function getConstellationList(d, trans) {
   var res = {},
       leo = euler[trans],
@@ -1299,6 +1311,7 @@ function transMultiLine(c, leo) {
 
 Celestial.getData = getData;
 Celestial.getPoint = getPoint;
+Celestial.getPlanet = getPlanet;
 //Defaults
 var settings = { 
   width: 0,     // Default width; height is determined by projection
