@@ -588,12 +588,12 @@ Celestial.display = function(config) {
       if (cfg.horizon.stroke) context.stroke(); 
     }
 
-
     if (cfg.controls) { 
       zoomState(prjMap.scale());
     }
   }
     
+
   function drawOutline(stroke) {
     var rot = prjMap.rotate();
     
