@@ -19,7 +19,7 @@ cp('-f', '../d3-celestial/lib/*', 'lib');
 cp('-f', '../d3-celestial/demo/*', 'celestial-demo');
 
 mv('-f', 'readme.md', 'celestial-demo/readme.md');
-
+/*
 echo('Copying asteroid-families');
 
 cp('-f', [
@@ -34,7 +34,7 @@ mv('-f', 'readme.md', 'asteroids-readme.md');
 mv('-f', 'viewer.html', 'asteroids-viewer.html');
 
 cp('-f', '../asteroid-families/data/*', 'data');
-
+*/
 
 echo('Copying d3-orrery');
 

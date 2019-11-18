@@ -2542,8 +2542,9 @@ function geo(cfg) {
     
   };
 
-  Celestial.date = function (dt) { 
+  Celestial.date = function (dt, tz) { 
     if (!dt) return date;  
+    zone = tz || zone;
     if (dtpick.isVisible()) dtpick.hide();
     date.setTime(dt.valueOf());
     $("datetime").value = dateFormat(dt, zone); 
@@ -2559,7 +2560,7 @@ function geo(cfg) {
       go();
     }
   };
-  //{"date":dt, "location":loc}
+  //{"date":dt, "location":loc, "timezone":tz}
   Celestial.skyview = function (cfg) {
     var valid = false;
     if (dtpick.isVisible()) dtpick.hide();
@@ -2568,6 +2569,7 @@ function geo(cfg) {
       $("datetime").value = dateFormat(cfg.date, zone); 
       valid = true;
     }
+    zone = cfg.timezone || zone;
     if (isValidLocation(cfg.location)) {
       geopos = cfg.location.slice();
       $("lat").value = geopos[0];
