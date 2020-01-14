@@ -110,8 +110,6 @@ Celestial.display = function(config) {
   container.append("path").datum(daylight).attr("class", "daylight");
 
   form(cfg);
-  // hide if not desired
-  if (cfg.form === false) d3.select("#celestial-form").style("display", "none"); 
   if ($("error") === null) d3.select("body").append("div").attr("id", "error");
 
   if ($("loc") === null) geo(cfg);
@@ -2515,7 +2513,11 @@ function setVisibility(cfg, which) {
        if (fld === "location") continue;
        d3.select("#" + fld).style( {"display": "none"} );     
      }
+     return;
    }
+   // hide if not desired
+   if (cfg.form === false) d3.select("#celestial-form").style("display", "none"); 
+
    for (fld in cfg.formFields) {
      if (!has(cfg.formFields, fld)) continue;
      if (fld === "location") continue;
