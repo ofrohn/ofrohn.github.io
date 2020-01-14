@@ -2501,13 +2501,22 @@ function setLimits() {
 }
 
 function setVisibility(cfg, which) {
-   var vis;
+   var vis, fld;
    if (!has(cfg, "formFields")) return;
    if (which && has(cfg.formFields, which)) {
      d3.select("#" + which).style( {"display": "none"} );
      return;
    }
-   for (var fld in cfg.formFields) {
+   // Special case for backward compatibility
+   if (cfg.form === false && cfg.location === true) {
+     d3.select("#celestial-form").style("display", "inline-block");
+     for (fld in cfg.formFields) {
+      if (!has(cfg.formFields, fld)) continue;
+       if (fld === "location") continue;
+       d3.select("#" + fld).style( {"display": "none"} );     
+     }
+   }
+   for (fld in cfg.formFields) {
      if (!has(cfg.formFields, fld)) continue;
      if (fld === "location") continue;
      vis = cfg.formFields[fld] === false ? "none" : "inline-block";
@@ -2696,8 +2705,8 @@ function geo(cfg) {
     return [l, b-0.001]; 
   };
 
-  if (has(cfg, "formFields")) {
-    d3.select("location").style( {"display": cfg.location === false || cfg.formFields.location === false ? "none" : "inline-block"} );
+  if (has(cfg, "formFields") && (cfg.location === true || cfg.formFields.location === true)) {
+    d3.select("#location").style( {"display": "inline-block"} );
   }
   //only if appropriate
   if (cfg.location === true && cfg.formFields.location === true)
