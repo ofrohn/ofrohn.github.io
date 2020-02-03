@@ -639,9 +639,11 @@ Celestial.display = function(config) {
     if (stroke === true) 
       context.stroke(); 
     else {
-      setClip(false);
+      //container.selectAll(".outline").remove();
+      //container.append("path").datum(d3.geo.circle().angle([179.9])).attr("class", "outline");
+      //setClip(false);
       context.fill();
-      setClip(prj.clip);    
+      //setClip(prj.clip);    
     }
     prjMap.rotate(rot);
   }
@@ -724,7 +726,7 @@ Celestial.display = function(config) {
     if (setit) {
       prjMap.clipAngle(90);
       container.selectAll(".outline").remove();
-      container.append("path").datum(d3.geo.circle().angle([90])).attr("class", "outline");
+      container.append("path").datum(d3.geo.circle().angle([179.9])).attr("class", "outline");
     } else {
       prjMap.clipAngle(null);
       container.selectAll(".outline").remove();
