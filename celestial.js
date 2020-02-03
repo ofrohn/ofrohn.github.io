@@ -631,7 +631,7 @@ Celestial.display = function(config) {
 
   function drawOutline(stroke) {
     var rot = prjMap.rotate(),
-        prj = getProjection(config.projection);
+        prj = getProjection(cfg.projection);
     
     prjMap.rotate([0,0]);
     setStyle(cfg.background);
