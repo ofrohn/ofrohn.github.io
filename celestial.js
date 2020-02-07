@@ -1,7 +1,7 @@
 // Copyright 2015-2019 Olaf Frohn https://github.com/ofrohn, see LICENSE
 !(function() {
 var Celestial = {
-  version: '0.6.20',
+  version: '0.6.21',
   container: null,
   data: []
 };
@@ -95,6 +95,7 @@ Celestial.display = function(config) {
     canvas.attr("style", "cursor: default!important");
   }
 
+  container.append("path").datum(graticule.outline).attr("class", "outline"); 
   setClip(proj.clip);
 
   d3.select(window).on('resize', resize);
@@ -725,12 +726,13 @@ Celestial.display = function(config) {
   function setClip(setit) {
     if (setit) {
       prjMap.clipAngle(90);
-      container.selectAll(".outline").remove();
-      container.append("path").datum(d3.geo.circle().angle([179.9])).attr("class", "outline");
+      //container.selectAll(".outline").remove();
+      //container.append("path").datum(graticule.outline).attr("class", "outline"); 
+      //container.append("path").datum(d3.geo.circle().angle([179.9])).attr("class", "outline");
     } else {
       prjMap.clipAngle(null);
-      container.selectAll(".outline").remove();
-      container.append("path").datum(graticule.outline).attr("class", "outline"); 
+      //container.selectAll(".outline").remove();
+      //container.append("path").datum(graticule.outline).attr("class", "outline"); 
     }        
   }
   
