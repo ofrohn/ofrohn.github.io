@@ -364,13 +364,14 @@ Celestial.display = function(config) {
     var prj = getProjection(config.projection);
     if (!prj) return;
     
-    var rot = prjMap.rotate(), ctr = prjMap.center(), sc = prjMap.scale(), ext = zoom.scaleExtent(),
+    var rot = prjMap.rotate(), ctr = prjMap.center(), sc = prjMap.scale(), ext = zoom.scaleExtent(), clip = [],
         prjFrom = Celestial.projection(cfg.projection).center(ctr).translate([width/2, height/2]).scale([ext[0]]),
         interval = ANIMINTERVAL_P, 
         delay = 0, 
         rTween = d3.interpolateNumber(ratio, prj.ratio);
 
-    if (proj.clip != prj.clip) interval = 0;// Different clip = no transition
+    if (proj.clip != prj.clip) interval = 0; // Different clip = no transition
+    //if (proj.clip != prj.clip) clip = [proj.clip, prj.clip]; // Clipangle from - to
     
     var prjTo = Celestial.projection(config.projection).center(ctr).translate([width/2, width/prj.ratio/2]).scale([prj.scale * width/1024]);
     var bAdapt = cfg.adaptable;
@@ -3905,6 +3906,7 @@ var datetimepicker = function(cfg, callback) {
   };
   
   this.isVisible = function () {
+    if (!document.getElementById("datepick")) return false;
     return d3.select("#datepick").classed("active") === true;
   };
 
