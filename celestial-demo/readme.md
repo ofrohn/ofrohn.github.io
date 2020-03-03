@@ -339,6 +339,10 @@ __Exposed functions__
   _location_: [latitude, longitude] array in degrees  
   _timezone_: offset from UTC in minutes  
 
+* `Celestial.showConstellation(id)`  
+  Zoom in and focus on the constellaion given by id.  
+  id: string with valid IAU 3-letter constellation identifier, case-insensitive  
+
 ### Animations  
 
 __Exposed functions__  
