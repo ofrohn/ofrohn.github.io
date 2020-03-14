@@ -1,7 +1,7 @@
 // Copyright 2015-2019 Olaf Frohn https://github.com/ofrohn, see LICENSE
 !(function() {
 var Celestial = {
-  version: '0.7.1',
+  version: '0.7.2',
   container: null,
   data: []
 };
@@ -31,7 +31,7 @@ Celestial.display = function(config) {
 
   var parent = $(cfg.container);
   if (parent) { 
-    parentElement = "#"+cfg.container;
+    parentElement = "#" + cfg.container;
     var st = window.getComputedStyle(parent, null);
     if (!parseInt(st.width) && !cfg.width) parent.style.width = px(parent.parentNode.clientWidth); 
   } else { 
@@ -57,8 +57,7 @@ Celestial.display = function(config) {
       dsoexp = cfg.dsos.exponent || starexp, //Object size base & exponent
       adapt = 1,
       rotation = getAngles(cfg.center),
-      path = cfg.datapath || "";
-      path = path.replace(/([^\/]$)/, "$1\/");
+      path = cfg.datapath;
   
       
   if (parentElement !== "body") $(cfg.container).style.height = px(height);
@@ -69,7 +68,9 @@ Celestial.display = function(config) {
   // Set initial zoom level
   scale *= zoomlevel;
 
-  var canvas = d3.select(parentElement).selectAll("canvas");
+  var canvas = d3.select(parentElement).selectAll("canvas"),
+      culture = (cfg.culture !== "" && cfg.culture !== "iau") ? cfg.culture : "";
+  
   if (canvas[0].length === 0) canvas = d3.select(parentElement).append("canvas");
   //canvas.attr("width", width).attr("height", height);
   canvas.style("width", px(width)).style("height", px(height)).attr("width", width * pixelRatio).attr("height", height * pixelRatio);
@@ -118,6 +119,9 @@ Celestial.display = function(config) {
 
 
   function load() {
+    var extConstellations = (has(formats.constellations, culture)) ? "." + culture : "",
+        extStars = (has(formats.starnames, culture)) ? "." + culture : "";
+
     //Background
     setClip(proj.clip);
     container.append("path").datum(graticule.outline).attr("class", "outline"); 
@@ -166,37 +170,22 @@ Celestial.display = function(config) {
     }); 
 
     //Constellation names or designation
-    d3.json(path + "constellations.json", function(error, json) {
+    var filename = "constellations" + extConstellations + ".json";
+    d3.json(path + filename, function(error, json) {
       if (error) return console.warn(error);
       
       var con = getData(json, trans);
-      
       container.selectAll(".constnames")
          .data(con.features)
          .enter().append("text")
          .attr("class", "constname");
-
-      var l = getConstellationList(json, trans);
-      if ($("constellation")) {
-        var sel = d3.select("#constellation"),
-            selected = 0,
-            list = Object.keys(l).map( function (key, i) { 
-              if (key === config.constellation) selected = i;
-              return {o:key, n:l[key].name};
-            });
-        list = [{o:"", n:"(Select constellation)"}].concat(list);
-        
-        sel.selectAll('option').data(list).enter().append('option')
-           .attr("value", function (d) { return d.o; })
-           .text(function (d) { return d.n; });
-        sel.property("selectedIndex", selected);
-        //$("constellation").firstChild.disabled = true;
-      }
-      Celestial.constellations = l;
+         
+      Celestial.constellations = getConstellationList(con);
     });
 
     //Constellation boundaries
-    d3.json(path + "constellations.bounds.json", function(error, json) {
+    filename = "constellations.bounds" + extConstellations + ".json";
+    d3.json(path + filename, function(error, json) {
       if (error) return console.warn(error);
 
       var conb = getData(json, trans);
@@ -208,7 +197,8 @@ Celestial.display = function(config) {
     });
 
     //Constellation lines
-    d3.json(path + "constellations.lines.json", function(error, json) {
+    filename = "constellations.lines" + extConstellations + ".json";
+    d3.json(path + filename, function(error, json) {
       if (error) return console.warn(error);
 
       var conl = getData(json, trans);
@@ -217,6 +207,8 @@ Celestial.display = function(config) {
          .data(conl.features)
          .enter().append("path")
          .attr("class", "constline");
+
+      listConstellations();
     });
     
     //Stars
@@ -233,7 +225,8 @@ Celestial.display = function(config) {
 
     });
 
-    d3.json(path + "starnames.json", function(error, json) {
+    filename = "starnames" + extStars + ".json";
+    d3.json(path + filename, function(error, json) {
       if (error) return console.warn(error);
 
       Object.assign(starnames, json);
@@ -503,7 +496,7 @@ Celestial.display = function(config) {
     if (cfg.constellations.show) {     
       if (cfg.constellations.bounds) { 
         container.selectAll(".boundaryline").each(function(d) { 
-          setStyle(cfg.constellations.boundstyle); 
+          setStyle(cfg.constellations.boundStyle); 
           if (Celestial.constellation && Celestial.constellation === d.id) {
             context.lineWidth *= 1.5;
             context.setLineDash([]);
@@ -514,11 +507,11 @@ Celestial.display = function(config) {
         drawOutline(true);
       }
 
-      if (cfg.constellations.names) { 
-        setTextStyle(cfg.constellations.namestyle);
+      if (cfg.constellations.name) { 
+        setTextStyle(cfg.constellations.nameStyle);
         container.selectAll(".constname").each( function(d) { 
           if (clip(d.geometry.coordinates)) {
-            setConstStyle(d.properties.rank, cfg.constellations.namestyle.font);
+            setConstStyle(d.properties.rank, cfg.constellations.nameStyle.font);
             var pt = prjMap(d.geometry.coordinates);
             context.fillText(constName(d), pt[0], pt[1]); 
           }
@@ -527,7 +520,7 @@ Celestial.display = function(config) {
 
       if (cfg.constellations.lines) { 
         container.selectAll(".constline").each(function(d) { 
-          setStyle(cfg.constellations.linestyle); 
+          setStyle(cfg.constellations.lineStyle); 
           map(d); 
           context.stroke(); 
         });
@@ -804,7 +797,7 @@ Celestial.display = function(config) {
   }
   
   function constName(d) { 
-    return cfg.constellations.desig ? d.properties.desig : d.properties[cfg.lang]; 
+    return d.properties[cfg.constellations.nameType]; 
   }
 
   function gridOrientation(pos, orient) {
@@ -1268,14 +1261,12 @@ function getPlanet(id, dt) {
   return res;
 }
 
-function getConstellationList(d, trans) {
+function getConstellationList(d) {
   var res = {},
-      leo = euler[trans],
       f = d.features;
       
   for (var i=0; i<f.length; i++) {
-    res[f[i].id.toLowerCase()] = {
-      name: f[i].properties.name,
+    res[f[i].id] = {
       center: f[i].properties.display.slice(0,2),
       scale: f[i].properties.display[2]
     };
@@ -1496,16 +1487,16 @@ var settings = {
   },
   constellations: {
     show: true,    // Show constellations 
-    names: true,   // Show constellation names 
-    desig: true,   // Show short constellation names (3 letter designations)
-    namestyle: { fill:"#cccc99", align: "center", baseline: "middle", opacity:0.8, 
+    name: true,   // Show constellation names 
+    nameType: "desig",   // What kind of name to show (default 3 letter designations)
+    nameStyle: { fill:"#cccc99", align: "center", baseline: "middle", opacity:0.8, 
 		             font: ["14px 'Lucida Sans Unicode', Helvetica, Arial, sans-serif",  // Different fonts for brighter &
-								        "12px 'Lucida Sans Unicode', Helvetica, Arial, sans-serif",  // sdarker constellations
+								        "12px 'Lucida Sans Unicode', Helvetica, Arial, sans-serif",  // darker constellations
 												"11px 'Lucida Sans Unicode', Helvetica, Arial, sans-serif"]},
     lines: true,   // Show constellation lines 
-    linestyle: { stroke: "#cccccc", width: 1.5, opacity: 0.6 },
+    lineStyle: { stroke: "#cccccc", width: 1.5, opacity: 0.6 },
     bounds: false,  // Show constellation boundaries 
-    boundstyle: { stroke: "#ccff00", width: 1, opacity: 0.8, dash: [2, 4] }
+    boundStyle: { stroke: "#ccff00", width: 1, opacity: 0.8, dash: [2, 4] }
   },
   mw: {
     show: true,    // Show Milky Way as filled polygons 
@@ -1593,8 +1584,12 @@ var settings = {
     res.stars.size = res.stars.size || 7;  
     res.stars.exponent = res.stars.exponent || -0.28;
     res.center = res.center || [0,0];
+    res.datapath = res.datapath || "";
+    res.datapath = res.datapath.replace(/([^\/]$)/, "$1\/");
+    
     // If no recognized language/culture settings, assume defaults
     if (!res.lang || res.lang.search(/^de|es$/) === -1) res.lang = "name";
+    //Set all poss. names to cfg.lang if not english
     if (!res.culture || res.culture.search(/^cn$/) === -1) res.culture = "iau";
     // Adapt legacy name parameters
     if (has(cfg, "stars")) {
@@ -1607,6 +1602,15 @@ var settings = {
       if (has(cfg.stars, "propernamelimit")) res.stars.propernameLimit = cfg.stars.propernamelimit;
       if (has(cfg.stars, "propernamestyle")) Object.assign(res.stars.propernameStyle, cfg.stars.propernamestyle);
     }
+    if (has(cfg, "constellations")) {
+      // names, desig -> name, nameType
+      if (has(cfg.constellations, "names")) res.constellations.nameType = "name";
+      if (has(cfg.constellations, "desig")) res.constellations.nameType = "desig";
+      if (has(cfg.constellations, "namestyle")) Object.assign(res.constellations.nameStyle, cfg.constellations.namestyle);
+      if (has(cfg.constellations, "linestyle")) Object.assign(res.constellations.lineStyle, cfg.constellations.linestyle);
+      if (has(cfg.constellations, "boundstyle")) Object.assign(res.constellations.boundStyle, cfg.constellations.boundstyle);
+    }
+    if (!res.constellations.nameType || res.constellations.nameType === "") res.constellations.nameType = "desig";
     Object.assign(globalConfig, res);
     return res; 
   }
@@ -1704,7 +1708,7 @@ Celestial.projections = function () { return projections; };
 
 var formats = {
   "starnames": {
-    // "name":"","bayer":"","flam":"","var":"","gl":"","hd":"HD224801","c":"And","desig":"CG"
+    // "name":"","bayer":"","flam":"","var":"","gl":"","hd":"","c":"","desig":""
     "iau": {
       "designation": {
         "desig": "Designation",     
@@ -1712,7 +1716,8 @@ var formats = {
         "flam": "Flamsteed",
         "var": "Variable",
         "gl": "Gliese",
-        "hd": "Draper"},
+        "hd": "Draper",
+        "hip": "Hipparcos"},
       "propername": {
         "name": "Proper name"}
     },
@@ -1724,6 +1729,38 @@ var formats = {
       "designation": { 
         "desig": "IAU Designation"}
     }
+  },
+  "constellations": {
+    "iau": {
+      "name": {
+        "desig": "Designation",
+        "iau": "Latin",
+        "en": "English",
+        "es": "Spanish",
+        "de": "German",
+        "cn": "Chinese",
+        "ar": "Arabic", 
+        "cz": "Czech", 
+        "ir": "Persian", 
+        "ee": "Estonian", 
+        "fi": "Finnish", 
+        "fr": "French", 
+        "gr": "Greek", 
+        "it": "Italian", 
+        "jp": "Japanese", 
+        "kr": "Korean", 
+        "in": "Marathi", 
+        "ru": "Russian", 
+        "tr": "Turkish", 
+        "il": "Hebrew"
+      }
+    },
+    "cn": {
+      "name": {
+        "name": "Proper name",
+        "en": "English",
+        "pinyin": "Pinyin"}
+    }             
   }
 };
 var Canvas = {}; 
@@ -2158,7 +2195,7 @@ function form(cfg) {
 
   col.append("label").attr("title", "Center and zoom in on this constellation").attr("for", "constellation").html("Show");
   col.append("select").attr("id", "constellation").on("change", showConstellation);
-
+  
   setCenter(config.center, config.transform);
 
   // Stars 
@@ -2188,7 +2225,7 @@ function form(cfg) {
       col.append("label").attr("for", "stars-" + fld).html("Show");
       
       selected = 0;
-      col.append("label").attr("title", "Type of star name").attr("for", "stars-" + fld + "Type").html(" ");
+      col.append("label").attr("title", "Type of star name").attr("for", "stars-" + fld + "Type").html("");
       sel = col.append("select").attr("id", "stars-" + fld + "Type").on("change", apply);
       list = keys.map(function (key, i) {
         if (key === config.stars[fld + "Type"]) selected = i;    
@@ -2203,20 +2240,13 @@ function form(cfg) {
     } else if (keys.length === 1) {
       //Simple field
     col.append("label").attr("for", "stars-" + fld).html(" " + names[fld][keys[0]]);
-      col.append("input").attr("type", "checkbox").attr("id", "stars-" + fld).property("checked", config.stars[fld]).on("change", apply);      
+      col.append("input").attr("type", "checkbox").attr("id", "stars-" + fld).property("checked", config.stars[fld]).on("change", apply);
     }    
     col.append("label").attr("for", "stars-" + fld + "Limit").html("down to mag");
     col.append("input").attr("type", "number").attr("id", "stars-" + fld + "Limit").attr("title", "Star name display limit (magnitude)").attr("value", config.stars[fld + "Limit"]).attr("max", "6").attr("min", "-1").attr("step", "0.1").on("change", apply);
   
   }
 
-/*  col.append("label").attr("for", "stars-desig").attr("title", "include HD/HIP designations").html("all");
-  col.append("input").attr("type", "checkbox").attr("id", "stars-desig").property("checked", config.stars.desig).on("change", apply);
-*/
-  
-/*  col.append("label").attr("for", "stars-propernamelimit").html("down to mag");
-  col.append("input").attr("type", "number").attr("id", "stars-propernamelimit").attr("title", "Star name display limit (magnitude)").attr("value", config.stars.propernamelimit).attr("max", "6").attr("min", "-1").attr("step", "0.1").on("change", apply);
-*/
   col.append("br");
 
   col.append("label").attr("for", "stars-size").html("Stellar disk size: base");
@@ -2269,25 +2299,56 @@ function form(cfg) {
   col.append("label").attr("class", "header").html("Constellations");
   //col.append("input").attr("type", "checkbox").attr("id", "constellations-show").property("checked", config.constellations.show).on("change", apply);
   
+  
+  names = formats.constellations[config.culture];
+  
+  for (fld in names) {
+    if (!has(names, fld)) continue;
+    var nameKeys = Object.keys(names[fld]);
+    if (nameKeys.length > 1) {
+      //Select List
+      col.append("label").attr("for", "constellations-" + fld).html("Show");
+      
+      selected = 0;
+      col.append("label").attr("title", "Language of constellation names").attr("for", "constellations-" + fld + "Type").html("");
+      sel = col.append("select").attr("id", "constellations-" + fld + "Type").on("change", apply);
+      list = nameKeys.map(function (key, i) {
+        if (key === config.constellations[fld + "Type"]) selected = i;    
+        return {o:key, n:names[fld][key]}; 
+      });
+      sel.selectAll("option").data(list).enter().append('option')
+         .attr("value", function (d) { return d.o; })
+         .text(function (d) { return d.n; });
+      sel.property("selectedIndex", selected);
+
+      col.append("input").attr("type", "checkbox").attr("id", "constellations-" + fld).property("checked", config.constellations[fld]).on("change", apply);
+    } else if (nameKeys.length === 1) {
+      //Simple field
+    col.append("label").attr("for", "constellations-" + fld).html(" " + names[fld][nameKeys[0]]);
+      col.append("input").attr("type", "checkbox").attr("id", "constellations-" + fld).property("checked", config.constellations[fld]).on("change", apply);      
+    }      
+  }
+
+  /*
   col.append("label").attr("for", "constellations-names").html("Show names");
   col.append("input").attr("type", "checkbox").attr("id", "constellations-names").property("checked", config.constellations.names).on("change", apply);
   
   col.append("label").attr("for", "constellations-desig").html("abbreviated");
   col.append("input").attr("type", "checkbox").attr("id", "constellations-desig").property("checked", config.constellations.desig).on("change", apply);
-  
+  */
   col.append("label").attr("for", "constellations-lines").html("with lines");
   col.append("input").attr("type", "checkbox").attr("id", "constellations-lines").property("checked", config.constellations.lines).on("change", apply);
   
   col.append("label").attr("for", "constellations-bounds").html("with boundaries");
   col.append("input").attr("type", "checkbox").attr("id", "constellations-bounds").property("checked", config.constellations.bounds).on("change", apply);
 
-  enable($("constellations-names"));
+  enable($("constellations-name"));
 
   // graticules & planes 
   col = frm.append("div").attr("class", "col").attr("id", "lines");
   col.append("label").attr("class", "header").html("Lines");
   
-  col.append("label").attr("title", "Laitudet/longitude grid lines").attr("for", "lines-graticule").html("Graticule");
+  col.append("label").attr("title", "Latitude/longitude grid lines").attr("for", "lines-graticule").html("Graticule");
   col.append("input").attr("type", "checkbox").attr("id", "lines-graticule-show").property("checked", config.lines.graticule.show).on("change", apply);
   
   col.append("label").attr("for", "lines-equatorial").html("Equator");
@@ -2374,7 +2435,7 @@ function form(cfg) {
     
     return cx.value !== "" && cy.value !== "";
   }
-  
+    
   function showConstellation() {
     var id = this.value;
     if (!id) return;
@@ -2388,11 +2449,13 @@ function form(cfg) {
       Celestial.redraw();
       return;
     }
-    id = id.toLowerCase();
+    //id = id.toLowerCase();
     if (!isObject(Celestial.constellations) || !has(Celestial.constellations, id)) return;
     
     var con = Celestial.constellations[id];
-    config.center = con.center;
+    //transform according to settings
+    var center = transformDeg(con.center, euler[config.transform]);
+    config.center = center;
     setCenter(config.center, config.transform);
     //config.lines.graticule.lat.pos = [Round(con.center[0])];
     //config.lines.graticule.lon.pos = [Round(con.center[1])];
@@ -2402,9 +2465,9 @@ function form(cfg) {
     var z = Celestial.zoomBy();
     if (z !== 1) anims.push({param:"zoom", value:1/z, duration:0});
     //rotate
-    anims.push({param:"center", value:con.center, duration:0});
+    anims.push({param:"center", value:center, duration:0});
     //and zoom in
-    var sc = con.scale > 10 ? 10 : con.scale;
+    var sc = 1 + (360/con.scale); // > 10 ? 10 : con.scale;
     anims.push({param:"zoom", value:sc, duration:0});
     Celestial.constellation = id;
     Celestial.animate(anims, false);    
@@ -2431,6 +2494,8 @@ function form(cfg) {
     if (src.id === "dsos-style-fill") {
       set("dsos-style-stroke", value);
       set("dsos-namestyle-fill", value);
+    } else if (src.id === "constellations-nameType") {
+      listConstellations();
     }
     getCenter();
     Celestial.apply(config);
@@ -2452,12 +2517,12 @@ function form(cfg) {
 // Dependend fields relations
 var depends = {
   "stars-show": ["stars-limit", "stars-colors", "stars-style-fill", "stars-designation", "stars-propername", "stars-size", "stars-exponent"],
-  "stars-designation": ["stars-designationLimit", "stars-designationType"],
+  "stars-designation": ["stars-designationType", "stars-designationLimit"],
   "stars-propername": ["stars-propernameLimit", "stars-propernameType"],
   "dsos-show": ["dsos-limit", "dsos-colors", "dsos-style-fill", "dsos-names", "dsos-size", "dsos-exponent"],
   "dsos-names": ["dsos-desig", "dsos-namelimit"],
    "mw-show": ["mw-style-opacity", "mw-style-fill"],
-  "constellations-names": ["constellations-desig"]
+  "constellations-name": ["constellations-nameType"]
 };
 
 // De/activate fields depending on selection of dependencies
@@ -2485,7 +2550,7 @@ function enable(source) {
       off = !$("dsos-names").checked || !$("dsos-show").checked;      
       for (i=0; i< depends["dsos-names"].length; i++) { fldEnable(depends["dsos-names"][i], off); }
       break;
-    case "constellations-show": 
+    case "constellations-name": 
       off = !$(fld).checked;
       for (i=0; i< depends[fld].length; i++) { fldEnable(depends[fld][i], off); }
       break;
@@ -2501,7 +2566,10 @@ function fldEnable(d, off) {
   var node = $(d);
   if (!node) return;
   node.disabled = off;
+  node.style.color = off ? "#999" : "#000";  
   node.previousSibling.style.color = off ? "#999" : "#000";  
+  //if (node.previousSibling.previousSibling && node.previousSibling.previousSibling.tagName === "LABEL")
+  //  node.previousSibling.previousSibling.style.color = off ? "#999" : "#000";  
 }
 
 // Error notification
@@ -2644,8 +2712,31 @@ function setVisibility(cfg, which) {
      vis = cfg.formFields[fld] === false ? "none" : "block";
      d3.select("#" + fld).style( {"display": vis} );     
    }
-  
 }
+
+function listConstellations() {
+  var sel = d3.select("#constellation"),
+      list = [], selected = 0, id, name, config = globalConfig;
+    
+  Celestial.container.selectAll(".constname").each( function(d, i) { 
+    id = d.properties.desig;
+    if (id === config.constellation) selected = i;
+    name = d.properties[config.constellations.nameType];
+    if (name !== id) name += " (" + id + ")";
+    list.push({o:id, n:name});
+  });
+  list = [{o:"", n:"(Select constellation)"}].concat(list);
+  
+  sel.selectAll('option').remove();
+  sel.selectAll('option').data(list).enter().append('option')
+     .attr("value", function (d) { return d.o; })
+     .text(function (d) { return d.n; });
+  sel.property("selectedIndex", selected);
+  //$("constellation").firstChild.disabled = true;
+
+  //Celestial.constellations = list;
+}
+
 
 
 
