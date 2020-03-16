@@ -2479,7 +2479,7 @@ function form(cfg) {
     var sc = 1 + (360/con.scale); // > 10 ? 10 : con.scale;
     anims.push({param:"zoom", value:sc, duration:0});
     Celestial.constellation = id;
-    Object.assign(globalConfig, config);   
+    //Object.assign(globalConfig, config);   
     Celestial.animate(anims, false);    
   }
   
