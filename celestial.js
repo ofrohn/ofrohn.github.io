@@ -1605,9 +1605,9 @@ var settings = {
     if (has(cfg, "constellations")) {
       // names, desig -> nameType
       if (has(cfg.constellations, "show") && cfg.constellations.show === true) res.constellations.name = true;
-      if (has(cfg.constellations, "names") && cfg.constellations.names === true) res.constellations.nameType = "iau";
+      if (has(cfg.constellations, "names") && cfg.constellations.names === true) res.constellations.nameType = "name";
       if (has(cfg.constellations, "desig") && cfg.constellations.desig === true) res.constellations.nameType = "desig";
-      if (res.constellations.nameType === "latin") res.constellations.nameType = "iau";
+      if (res.constellations.nameType === "latin") res.constellations.nameType = "lat";
       if (has(cfg.constellations, "namestyle")) Object.assign(res.constellations.nameStyle, cfg.constellations.namestyle);
       if (has(cfg.constellations, "linestyle")) Object.assign(res.constellations.lineStyle, cfg.constellations.linestyle);
       if (has(cfg.constellations, "boundstyle")) Object.assign(res.constellations.boundStyle, cfg.constellations.boundstyle);
