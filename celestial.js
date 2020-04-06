@@ -568,8 +568,8 @@ Celestial.display = function(config) {
           if (has(cfg.dsos.symbols[type], "stroke")) context.stroke();
           else context.fill();
           
-          if (cfg.dsos.names && dsoDisplay(d.properties, cfg.dsos.namelimit)) {
-            setTextStyle(cfg.dsos.namestyle);
+          if (cfg.dsos.names && dsoDisplay(d.properties, cfg.dsos.nameLimit)) {
+            setTextStyle(cfg.dsos.nameStyle);
             if (cfg.dsos.colors === true) context.fillStyle = cfg.dsos.symbols[type].fill;
             context.fillText(dsoName(d), pt[0]+r, pt[1]-r);      
           }         
@@ -577,14 +577,15 @@ Celestial.display = function(config) {
       });
     }
 
-    if ((cfg.location || cfg.formFields.location) && cfg.transform === "equatorial" && cfg.planets.show && Celestial.origin) { 
+    if ((cfg.location || cfg.formFields.location) && cfg.planets.show && Celestial.origin) { 
       var dt = Celestial.date(),
           o = Celestial.origin(dt).spherical();
       container.selectAll(".planet").each(function(d) {
         var id = d.id(), r = 6,
-            p = d(dt).equatorial(o);  //transform
-        if (clip(p.ephemeris.pos)) {
-          var pt = prjMap(p.ephemeris.pos),
+            p = d(dt).equatorial(o),
+            pos = transformDeg(p.ephemeris.pos, euler[cfg.transform]);  //transform; 
+        if (clip(pos)) {
+          var pt = prjMap(pos),
               sym = cfg.planets.symbols[id];
           if (cfg.planets.symbolType === "letter") {
             setTextStyle(cfg.planets.symbolStyle);
@@ -796,10 +797,7 @@ Celestial.display = function(config) {
  
 
   function dsoName(d) {
-    var prop = d.properties;
-    if (prop.name === "") return; 
-    if (cfg.dsos.desig && prop.desig) return prop.desig; 
-    return prop.name;
+    return d.properties[cfg.dsos.namesType]; 
   }
   
   /*Star designation  */
@@ -1360,7 +1358,7 @@ function getGridValues(type, loc) {
       case "outline": 
         if (type === "lon") { 
           lines = lines.concat(getLine(type, cfg.center[1]-89.99, "S"));
-          lines = lines.concat(getLine(type, cfg.center[1]+89.99), "N");
+          lines = lines.concat(getLine(type, cfg.center[1]+89.99, "N"));
         } else {
 					// TODO: hemi
           lines = lines.concat(getLine(type, cfg.center[0]-179.99, "E"));
@@ -1502,8 +1500,9 @@ var settings = {
     style: { fill: "#cccccc", stroke: "#cccccc", width: 2, opacity: 1 }, // Default style for dsos
     names: true,   // Show DSO names
     desig: true,   // Show short DSO names
-    namestyle: { fill: "#cccccc", font: "11px 'Lucida Sans Unicode', Helvetica, Arial, serif", align: "left", baseline: "top" },
-    namelimit: 4,  // Show only names for DSOs brighter than namelimit
+    namesType: "name",  // "name" or "desig"
+    nameStyle: { fill: "#cccccc", font: "11px 'Lucida Sans Unicode', Helvetica, Arial, serif", align: "left", baseline: "top" },
+    nameLimit: 4,  // Show only names for DSOs brighter than nameLimit
     size: null,    // Optional seperate scale size for DSOs, null = stars.size
     exponent: 1.4, // Scale exponent for DSO size, larger = more non-linear
     data: "dsos.bright.json",  // Data source for DSOs
@@ -1548,7 +1547,7 @@ var settings = {
   lines: {
     graticule: { show: true, stroke: "#cccccc", width: 0.6, opacity: 0.8,      // Show graticule lines 
 			// grid values: "outline", "center", or [lat,...] specific position
-      lon: {pos: [""], fill: "#eee", font: "10px 'Lucida Sans Unicode', Helvetica, Arial, sans-serif"}, 
+      lon: {pos: [], fill: "#eee", font: "10px 'Lucida Sans Unicode', Helvetica, Arial, sans-serif"}, 
 			// grid values: "outline", "center", or [lon,...] specific position
 		  lat: {pos: [""], fill: "#eee", font: "10px 'Lucida Sans Unicode', Helvetica, Arial, sans-serif"}},
     equatorial: { show: true, stroke: "#aaaaaa", width: 1.3, opacity: 0.7 },    // Show equatorial plane 
@@ -1653,6 +1652,14 @@ var settings = {
       if (has(cfg.stars, "propernamelimit")) res.stars.propernameLimit = cfg.stars.propernamelimit;
       if (has(cfg.stars, "propernamestyle")) Object.assign(res.stars.propernameStyle, cfg.stars.propernamestyle);
     }
+    if (has(cfg, "dsos")) {
+      // names, desig -> namesType
+      if (has(cfg.dsos, "names") && cfg.dsos.names === true) res.dsos.namesType = "name";
+      if (has(cfg.dsos, "desig") && cfg.dsos.desig === true) res.dsos.namesType = "desig";
+      if (has(cfg.dsos, "namelimit")) res.dsos.nameLimit = cfg.dsos.namelimit;
+      if (has(cfg.dsos, "namestyle")) Object.assign(res.dsos.nameStyle, cfg.dsos.namestyle);    
+    }
+    if (!res.dsos.namesType || res.dsos.namesType === "") res.dsos.namesType = "desig";
     if (has(cfg, "constellations")) {
       // names, desig -> namesType
       if (has(cfg.constellations, "show") && cfg.constellations.show === true) res.constellations.names = true;
@@ -1871,6 +1878,22 @@ var formats = {
         "pinyin": "Pinyin",
         "en": "English"
       }
+    }
+  },
+  "dsos": {
+    "iau": {
+      "names": {
+        "desig": "Designation",
+        "name": "Name"
+      }
+    },
+    "cn": {
+      "names": {
+        "desig": "Designation",
+        "name": "Chinese",
+        "pinyin": "Pinyin",
+        "en": "English"
+      }      
     }
   }
 };
@@ -2394,14 +2417,36 @@ function form(cfg) {
 
   col.append("br");
   
-  col.append("label").attr("for", "dsos-names").html("Show names");
-  col.append("input").attr("type", "checkbox").attr("id", "dsos-names").property("checked", config.dsos.names).on("change", apply);
+//  col.append("label").attr("for", "dsos-names").html("Show names");
+//  col.append("input").attr("type", "checkbox").attr("id", "dsos-names").property("checked", config.dsos.names).on("change", apply);
+
+  names = formats.dsos[config.culture];
   
-  col.append("label").attr("for", "dsos-desig").html("or designations");
-  col.append("input").attr("type", "checkbox").attr("id", "dsos-desig").property("checked", config.dsos.desig).on("change", apply);
+  for (fld in names) {
+    if (!has(names, fld)) continue;
+    var dsoKeys = Object.keys(names[fld]);
+    col.append("label").attr("for", "dsos-" + fld).html("Show");
+      
+    selected = 0;
+    col.append("label").attr("title", "Type of DSO name").attr("for", "dsos-" + fld + "Type").html("");
+    sel = col.append("select").attr("id", "dsos-" + fld + "Type").on("change", apply);
+    list = dsoKeys.map(function (key, i) {
+      if (key === config.stars[fld + "Type"]) selected = i;    
+      return {o:key, n:names[fld][key]}; 
+    });
+    sel.selectAll("option").data(list).enter().append('option')
+       .attr("value", function (d) { return d.o; })
+       .text(function (d) { return d.n; });
+    sel.property("selectedIndex", selected);
+
+    col.append("input").attr("type", "checkbox").attr("id", "dsos-" + fld).property("checked", config.dsos[fld]).on("change", apply);
+  }    
   
-  col.append("label").attr("for", "dsos-namelimit").html("down to mag");
-  col.append("input").attr("type", "number").attr("id", "dsos-namelimit").attr("title", "DSO name display limit (magnitude)").attr("value", config.dsos.namelimit).attr("max", "6").attr("min", "0").attr("step", "0.1").on("change", apply);
+//  col.append("label").attr("for", "dsos-desig").html("or designations");
+//  col.append("input").attr("type", "checkbox").attr("id", "dsos-desig").property("checked", config.dsos.desig).on("change", apply);
+  
+  col.append("label").attr("for", "dsos-nameLimit").html("down to mag");
+  col.append("input").attr("type", "number").attr("id", "dsos-nameLimit").attr("title", "DSO name display limit (magnitude)").attr("value", config.dsos.nameLimit).attr("max", "6").attr("min", "0").attr("step", "0.1").on("change", apply);
   col.append("br");
 
   col.append("label").attr("for", "dsos-size").html("DSO symbol size: (base");
@@ -2493,6 +2538,7 @@ function form(cfg) {
 
   col.append("label").attr("for", "mw-style-opacity").html(" opacity");
   col.append("input").attr("type", "number").attr("id", "mw-style-opacity").attr("title", "Transparency of each Milky Way layer").attr("value", config.mw.style.opacity).attr("max", "1").attr("min", "0").attr("step", "0.01").on("change", apply);
+  
   col.append("br");
   
   col.append("label").attr("for", "background").html("Background color");
@@ -2500,6 +2546,21 @@ function form(cfg) {
   
   col.append("label").attr("title", "Star/DSO sizes are increased with higher zoom-levels").attr("for", "adaptable").html("Adaptable object sizes");
   col.append("input").attr("type", "checkbox").attr("id", "adaptable").property("checked", config.adaptable).on("change", apply);
+  
+  // General language setting
+  var langKeys = formats_all[config.culture];
+
+  selected = 0;
+  col.append("label").attr("title", "General language setting").attr("for", "lang").html("Language ");
+  sel = col.append("select").attr("id", "lang").on("change", apply);
+  list = langKeys.map(function (key, i) {
+    if (key === config.lang) selected = i;    
+    return {o:key, n:formats.constellations[config.culture].names[key]}; 
+  });
+  sel.selectAll("option").data(list).enter().append('option')
+     .attr("value", function (d) { return d.o; })
+     .text(function (d) { return d.n; });
+  sel.property("selectedIndex", selected);
    
   setLimits();
   setUnit(config.transform);
@@ -2571,7 +2632,6 @@ function form(cfg) {
       //Celestial.redraw();
       return;
     }
-    //id = id.toLowerCase();
     if (!isObject(Celestial.constellations) || !has(Celestial.constellations, id)) return;
     
     var con = Celestial.constellations[id];
@@ -2616,10 +2676,13 @@ function form(cfg) {
     set(src.id, value);
     if (src.id === "dsos-style-fill") {
       set("dsos-style-stroke", value);
-      set("dsos-namestyle-fill", value);
+      set("dsos-nameStyle-fill", value);
     } else if (src.id === "constellations-namesType") {
       listConstellations();
-    }
+    } else if (src.id === "lang") {
+      setLanguage(value);
+    } 
+
     getCenter();
     Celestial.apply(config);
   }
@@ -2634,6 +2697,14 @@ function form(cfg) {
     }   
   }
   
+  function setLanguage(lang) {
+     if (has(formats.constellations[config.culture].names, lang)) config.constellations.namesType = lang;
+     else config.constellations.namesType = "desig";
+
+     if (has(formats.planets[config.culture].names, lang)) config.planets.namesType = lang;
+     else config.planets.namesType = "desig";
+  }
+  
   Celestial.showConstellation = showCon;
 }
 
@@ -2646,8 +2717,8 @@ var depends = {
   "stars-designation": ["stars-designationType", "stars-designationLimit"],
   "stars-propername": ["stars-propernameLimit", "stars-propernameType"],
   "dsos-show": ["dsos-limit", "dsos-colors", "dsos-style-fill", "dsos-names", "dsos-size", "dsos-exponent"],
-  "dsos-names": ["dsos-desig", "dsos-namelimit"],
-   "mw-show": ["mw-style-opacity", "mw-style-fill"],
+  "dsos-names": ["dsos-namesType", "dsos-nameLimit"],
+  "mw-show": ["mw-style-opacity", "mw-style-fill"],
   "constellations-names": ["constellations-namesType"],
   "planets-show": ["planets-symbolType", "planets-names"],
   "planets-names": ["planets-namesType"]
@@ -2800,7 +2871,7 @@ function setLimits() {
 
   if (res.d != 6) {
     $("dsos-limit").max = res.d;
-    $("dsos-namelimit").max = res.d;
+    $("dsos-nameLimit").max = res.d;
   }
    
    s = config.stars.data;
@@ -2813,7 +2884,8 @@ function setLimits() {
 
   if (res.s != 6) {
     $("stars-limit").max = res.s;
-    $("stars-namelimit").max = res.s;
+    $("stars-designationLimit").max = res.s;
+    $("stars-propernameLimit").max = res.s;
   }
 
   return res;
