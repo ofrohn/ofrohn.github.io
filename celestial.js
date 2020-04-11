@@ -2716,6 +2716,8 @@ function form(cfg) {
     else config.stars.propernameType = "name";
     //update cont. list
     update();
+    listConstellations();
+    
   }
   
   
@@ -2742,8 +2744,8 @@ function form(cfg) {
             case "centerz": this.value = config.center[2]; break;
           }
         }
-      } else if (id === "datetime" || id === "hr" || id === "min" || id === "sec") {
-        return;//skip
+      } else if (id === "datetime" || id === "hr" || id === "min" || id === "sec" || id === "tz") {
+        return;//skip, timezone?
       } else if (this.type !== "button") {
         var value = get(id);      
         switch (this.type) {
@@ -2913,7 +2915,7 @@ function setCenter(ctr, trans) {
   if (!cx || !cy) return;
   
   if (ctr === null || ctr.length < 1) ctr = [0,0,0]; 
-  if (ctr.length <= 2) ctr[2] = 0;
+  if (ctr.length <= 2 || ctr[2] === undefined) ctr[2] = 0;
   //config.center = ctr; 
   if (trans !== "equatorial") cx.value = ctr[0].toFixed(1); 
   else cx.value = ctr[0] < 0 ? (ctr[0] / 15 + 24).toFixed(1) : (ctr[0] / 15).toFixed(1); 
@@ -3240,6 +3242,7 @@ function geo(cfg) {
       $("lon").value = geopos[1];
       valid = true;
     }
+    //Celestial.updateForm();
     if (valid === true) go();
     else return {"date": date, "location": geopos};
   };  
