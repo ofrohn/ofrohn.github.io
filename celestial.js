@@ -917,6 +917,7 @@ Celestial.display = function(config) {
     var f = arrayfy(font);
     context.font = f[rank];    
   };
+  this.symbol = Canvas.symbol;
   this.dsoSymbol = dsoSymbol;
   this.redraw = redraw; 
   this.resize = function(config) { 
