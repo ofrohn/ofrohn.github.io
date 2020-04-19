@@ -266,6 +266,7 @@ Celestial.display = function(config) {
          .data(pl)
          .enter().append("path")
          .attr("class", "planet");
+      redraw();
     });
 
     if (Celestial.data.length > 0) { 
