@@ -47,7 +47,7 @@ cp('-f', [
 mv('-f', 'readme.md', 'orrery-readme.md');
 mv('-f', 'viewer.html', 'orrery-viewer.html');
 
-cp('-f', '../d3-orrery/data/*', 'data');
+//cp('-f', '../d3-orrery/data/*', 'data');
 cp('-fR', '../d3-orrery/images/*', 'images');
 cp('-f', '../d3-orrery/lib/*', 'lib');
 
