@@ -3294,14 +3294,14 @@ function geo(cfg) {
       if (error) return console.warn(error);
       if (json.status === "FAILED") {
         // Location at sea inferred from longitude
-        timeZone = Math.round(p[1] / 15) * 60;
+        timeZone = -Math.round(p[1] / 15) * 60;
         geoInfo = {
           gmtOffset: timeZone * 60,
           message: "Sea locatation inferred",
           timestamp: timestamp
         };
       } else
-        timeZone = json.gmtOffset / 60;
+        timeZone = -json.gmtOffset / 60;
         geoInfo = json;
       go();
     }); 
