@@ -3305,7 +3305,7 @@ function geo(cfg) {
         geoInfo = json;
       }
       if (settime) {
-        date.setTime(geoInfo.timestamp * 1000);
+        //date.setTime(geoInfo.timestamp * 1000);
         $("datetime").value = dateFormat(date, timeZone);
       }
       go();
