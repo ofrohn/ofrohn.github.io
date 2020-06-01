@@ -3304,7 +3304,7 @@ function geo(cfg) {
         geoInfo = {
           gmtOffset: timeZone * 60,
           message: "Sea locatation inferred",
-          timestamp: timestamp + timeZone * 60
+          timestamp: timestamp
         };
       } else {
         timeZone = json.gmtOffset / 60;
