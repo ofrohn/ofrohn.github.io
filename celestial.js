@@ -1216,6 +1216,11 @@ function getMST(dt, lng)
 }
 
 Celestial.horizontal = horizontal;
+Celestial.ha = function(dt, lng, ra) {
+  var ha = getMST(dt, lng) - ra;
+  if (ha < 180) ha = ha + 360;
+  return ha;
+};
 //Add more JSON data to the map
 var hasCallback = false;
 
