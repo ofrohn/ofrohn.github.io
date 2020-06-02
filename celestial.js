@@ -3299,7 +3299,8 @@ function geo(cfg) {
     if (!p) return;
     var timestamp = Math.floor(date.getTime() / 1000),
         url = "http://api.timezonedb.com/v2.1/get-time-zone?key=AEFXZPQ3FDPF&format=json&by=position" + 
-              "&lat=" + p[0] + "&lng=" + p[1] + "&time=" + timestamp;
+              "&lat=" + p[0] + "&lng=" + p[1] + "&time=" + timestamp,
+        oldZone = timeZone;
 
     d3.json(url, function(error, json) { 
       if (error) return console.warn(error);
@@ -3316,7 +3317,7 @@ function geo(cfg) {
         geoInfo = json;
       }
       if (settime) {
-        //date.setTime(geoInfo.timestamp * 1000);
+        date.setTime(timestamp * 1000 - (timeZone - oldZone) * 60000);
         $("datetime").value = dateFormat(date, timeZone);
       }
       go();
