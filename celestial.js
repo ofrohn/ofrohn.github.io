@@ -1483,6 +1483,7 @@ var settings = {
   advanced: true,     // Display fewer form fields if false
   daterange: [],      // Calender date range; null: displaydate-+10; [n<100]: displaydate-+n; [yr]: yr-+10; 
                       // [yr, n<100]: [yr-n, yr+n]; [yr0, yr1]
+  settimezone: true,  // Automatcally set time zone when geolocation changes
   controls: true,     // Display zoom controls
   lang: "",           // Global language override for names, any name setting that has the chosen language available
                       // Default: desig or empty string for designations, other languages as used anywhere else
@@ -3316,10 +3317,11 @@ function geo(cfg) {
         timeZone = json.gmtOffset / 60;
         geoInfo = json;
       }
-      if (settime) {
-        date.setTime(timestamp * 1000 - (timeZone - oldZone) * 60000);
-        $("datetime").value = dateFormat(date, timeZone);
-      }
+      //if (settime) {
+        //date.setTime(timestamp * 1000); // - (timeZone - oldZone) * 60000);
+        //console.log(date.toUTCString());
+      //}
+      $("datetime").value = dateFormat(date, timeZone);
       go();
     }); 
   }
@@ -5141,7 +5143,7 @@ d3.svg.customSymbol = function() {
 var datetimepicker = function(cfg, callback) {
   var date = new Date(), 
       tzFormat = d3.time.format("%Z"),
-      tz = [{"−12:00":-720}, {"−11:00":-660}, {"−10:00":-600}, {"−09:30":-570}, {"−09:00":-540}, {"−08:00":-480}, {"−07:00":-420}, {"−06:00":-360}, {"−05:00":-300}, {"−04:30":-270}, {"−04:00":-240}, {"−03:30":-210}, {"−03:00":-180}, {"−02:00":-120}, {"−01:00":-60}, {"±00:00":0}, {"+01:00":60}, {"+02:00":120}, {"+03:00":180}, {"+03:30":210}, {"+04:00":240}, {"+04:30":270}, {"+05:00":300}, {"+05:30":330}, {"+05:45":345}, {"+06:00":360}, {"+06:30":390}, {"+07:00":420}, {"+08:00":480}, {"+08:30":510}, {"+08:45":525}, {"+09:00":540}, {"+09:30":570}, {"+10:00":600}, {"+10:30":630}, {"+11:00":660}, {"+12:00":720}, {"+12:45":765}, {"+13:00":780}, {"+14:00":840}],
+      tz = [{"−12:00":-720}, {"−11:00":-660}, {"−10:00":-600}, {"−09:30":-570}, {"−09:00":-540}, {"−08:00":-480}, {"−07:00":-420}, {"−06:00":-360}, {"−05:00":-300}, {"−04:30":-270}, {"−04:00":-240}, {"−03:30":-210}, {"−03:00":-180}, {"−02:30":-150}, {"−02:00":-120}, {"−01:00":-60}, {"±00:00":0}, {"+01:00":60}, {"+02:00":120}, {"+03:00":180}, {"+03:30":210}, {"+04:00":240}, {"+04:30":270}, {"+05:00":300}, {"+05:30":330}, {"+05:45":345}, {"+06:00":360}, {"+06:30":390}, {"+07:00":420}, {"+08:00":480}, {"+08:30":510}, {"+08:45":525}, {"+09:00":540}, {"+09:30":570}, {"+10:00":600}, {"+10:30":630}, {"+11:00":660}, {"+12:00":720}, {"+12:45":765}, {"+13:00":780}, {"+14:00":840}],
       months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
       days = ["Su", "M", "Tu", "W", "Th", "F", "Sa"],
       years = getYears(date),
