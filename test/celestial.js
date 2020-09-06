@@ -84,7 +84,7 @@ Celestial.display = function(config) {
   map = d3.geo.path().projection(mapProjection).context(context);
    
   //parent div with id #celestial-map or body
-  if (container) container.selectAll("*").remove();
+  if (container) container.selectAll(parentElement + "*").remove();
   else container = d3.select(parentElement).append("container");
 
   if (cfg.interactive) {
@@ -114,7 +114,7 @@ Celestial.display = function(config) {
   else if (cfg.location === true && cfg.follow === "zenith") rotate({center: Celestial.zenith()});
 
   if (cfg.location === true || cfg.formFields.location === true) {
-    d3.select("#location").style("display", "inline-block");
+    d3.select(parentElement + " #location").style("display", "inline-block");
     fldEnable("horizon-show", projectionSetting.clip);
     fldEnable("daylight-show", !projectionSetting.clip);
   }
@@ -133,12 +133,12 @@ Celestial.display = function(config) {
       if (key === "graticule") {
         container.append("path").datum(graticule).attr("class", "graticule"); 
         if (has(cfg.lines.graticule, "lon") && cfg.lines.graticule.lon.pos.length > 0) 
-          container.selectAll(".gridvalues_lon")
+          container.selectAll(parentElement + " .gridvalues_lon")
             .data(getGridValues("lon", cfg.lines.graticule.lon.pos))
             .enter().append("path")
             .attr("class", "graticule_lon"); 
         if (has(cfg.lines.graticule, "lat") && cfg.lines.graticule.lat.pos.length > 0) 
-          container.selectAll(".gridvalues_lat")
+          container.selectAll(parentElement + " .gridvalues_lat")
             .data(getGridValues("lat", cfg.lines.graticule.lat.pos))
             .enter().append("path")
             .attr("class", "graticule_lat"); 
@@ -159,11 +159,11 @@ Celestial.display = function(config) {
       var mw = getData(json, cfg.transform);
       var mw_back = getMwbackground(mw);
 
-      container.selectAll(".mway")
+      container.selectAll(parentElement + " .mway")
          .data(mw.features)
          .enter().append("path")
          .attr("class", "mw");
-      container.selectAll(".mwaybg")
+      container.selectAll(parentElement + " .mwaybg")
          .data(mw_back.features)
          .enter().append("path")
          .attr("class", "mwbg");
@@ -175,7 +175,7 @@ Celestial.display = function(config) {
       if (error) return console.warn(error);
       
       var con = getData(json, cfg.transform);
-      container.selectAll(".constnames")
+      container.selectAll(parentElement + " .constnames")
          .data(con.features)
          .enter().append("text")
          .attr("class", "constname");
@@ -191,7 +191,7 @@ Celestial.display = function(config) {
       //var cb = getData(topojson.feature(json, json.objects.constellations_bounds), cfg.transform);
       var cb = getData(json, cfg.transform);
       
-      container.selectAll(".bounds")
+      container.selectAll(parentElement + " .bounds")
          .data(cb.features)
          .enter().append("path")
          .attr("class", "boundaryline");
@@ -204,7 +204,7 @@ Celestial.display = function(config) {
 
       var conl = getData(json, cfg.transform);
 
-      container.selectAll(".lines")
+      container.selectAll(parentElement + " .lines")
          .data(conl.features)
          .enter().append("path")
          .attr("class", "constline");
@@ -219,7 +219,7 @@ Celestial.display = function(config) {
 
       var st = getData(json, cfg.transform);
 
-      container.selectAll(".stars")
+      container.selectAll(parentElement + " .stars")
          .data(st.features)
          .enter().append("path")
          .attr("class", "star");
@@ -240,7 +240,7 @@ Celestial.display = function(config) {
       
       var ds = getData(json, cfg.transform);
 
-      container.selectAll(".dsos")
+      container.selectAll(parentElement + " .dsos")
          .data(ds.features)
          .enter().append("path")
          .attr("class", "dso" );
@@ -260,7 +260,7 @@ Celestial.display = function(config) {
       
       var pl = getPlanets(json, cfg.transform);
 
-      container.selectAll(".planets")
+      container.selectAll(parentElement + " .planets")
          .data(pl)
          .enter().append("path")
          .attr("class", "planet");
@@ -468,23 +468,23 @@ Celestial.display = function(config) {
     
     //Draw all types of objects on the canvas
     if (cfg.mw.show) { 
-      container.selectAll(".mw").each(function(d) { setStyle(cfg.mw.style); map(d); context.fill(); });
+      container.selectAll(parentElement + " .mw").each(function(d) { setStyle(cfg.mw.style); map(d); context.fill(); });
       // paint mw-outside in background color
       if (cfg.transform !== "supergalactic" && cfg.background.opacity > 0.95)
-        container.selectAll(".mwbg").each(function(d) { setStyle(cfg.background); map(d); context.fill(); });
+        container.selectAll(parentElement + " .mwbg").each(function(d) { setStyle(cfg.background); map(d); context.fill(); });
     }
     
     for (var key in cfg.lines) {
       if (!has(cfg.lines, key)) continue;
       if (cfg.lines[key].show !== true) continue;
       setStyle(cfg.lines[key]);
-      container.selectAll("." + key).attr("d", map);  
+      container.selectAll(parentElement + " ." + key).attr("d", map);  
       context.stroke(); 
     }
 
     if (has(cfg.lines.graticule, "lon")) {
       setTextStyle(cfg.lines.graticule.lon);
-      container.selectAll(".graticule_lon").each(function(d, i) { 
+      container.selectAll(parentElement + " .graticule_lon").each(function(d, i) { 
         if (clip(d.geometry.coordinates)) {
           var pt = mapProjection(d.geometry.coordinates);
           gridOrientation(pt, d.properties.orientation);
@@ -495,7 +495,7 @@ Celestial.display = function(config) {
     
     if (has(cfg.lines.graticule, "lat")) {
       setTextStyle(cfg.lines.graticule.lat);
-      container.selectAll(".graticule_lat").each(function(d, i) { 
+      container.selectAll(parentElement + " .graticule_lat").each(function(d, i) { 
         if (clip(d.geometry.coordinates)) {
           var pt = mapProjection(d.geometry.coordinates);
           gridOrientation(pt, d.properties.orientation);
@@ -505,7 +505,7 @@ Celestial.display = function(config) {
     }
     
     if (cfg.constellations.bounds) { 
-      container.selectAll(".boundaryline").each(function(d) { 
+      container.selectAll(parentElement + " .boundaryline").each(function(d) { 
         setStyle(cfg.constellations.boundStyle); 
         if (Celestial.constellation) {
           var re = new RegExp("\\b" + Celestial.constellation + "\\b");
@@ -522,7 +522,7 @@ Celestial.display = function(config) {
     }
 
     if (cfg.constellations.lines) { 
-      container.selectAll(".constline").each(function(d) { 
+      container.selectAll(parentElement + " .constline").each(function(d) { 
         setStyleA(d.properties.rank, cfg.constellations.lineStyle); 
         map(d); 
         context.stroke(); 
@@ -533,7 +533,7 @@ Celestial.display = function(config) {
 
     if (cfg.constellations.names) { 
       //setTextStyle(cfg.constellations.nameStyle);
-      container.selectAll(".constname").each( function(d) { 
+      container.selectAll(parentElement + " .constname").each( function(d) { 
         if (clip(d.geometry.coordinates)) {
           setStyleA(d.properties.rank, cfg.constellations.nameStyle);
           var pt = mapProjection(d.geometry.coordinates);
@@ -545,7 +545,7 @@ Celestial.display = function(config) {
 
     if (cfg.stars.show) { 
       setStyle(cfg.stars.style);
-      container.selectAll(".star").each(function(d) {
+      container.selectAll(parentElement + " .star").each(function(d) {
         if (clip(d.geometry.coordinates) && d.properties.mag <= cfg.stars.limit) {
           var pt = mapProjection(d.geometry.coordinates),
               r = starSize(d);
@@ -567,7 +567,7 @@ Celestial.display = function(config) {
     }
     
     if (cfg.dsos.show) { 
-      container.selectAll(".dso").each(function(d) {
+      container.selectAll(parentElement + " .dso").each(function(d) {
         if (clip(d.geometry.coordinates) && dsoDisplay(d.properties, cfg.dsos.limit)) {
           var pt = mapProjection(d.geometry.coordinates),
               type = d.properties.type;
@@ -589,7 +589,7 @@ Celestial.display = function(config) {
     if ((cfg.location || cfg.formFields.location) && cfg.planets.show && Celestial.origin) { 
       var dt = Celestial.date(),
           o = Celestial.origin(dt).spherical();
-      container.selectAll(".planet").each(function(d) {
+      container.selectAll(parentElement + " .planet").each(function(d) {
         var id = d.id(), r = 12 * adapt,
             p = d(dt).equatorial(o),
             pos = transformDeg(p.ephemeris.pos, euler[cfg.transform]);  //transform; 
@@ -643,7 +643,7 @@ Celestial.display = function(config) {
 
         daylight.origin(solpos);
         setSkyStyle(dist, pt);
-        container.selectAll(".daylight").datum(daylight).attr("d", map);
+        container.selectAll(parentElement + " .daylight").datum(daylight).attr("d", map);
         context.fill();    
         context.fillStyle = "#fff"; 
         if (clip(solpos)) {
@@ -658,7 +658,7 @@ Celestial.display = function(config) {
     if ((cfg.location || cfg.formFields.location) && cfg.horizon.show && !projectionSetting.clip) {
       circle.origin(Celestial.nadir());
       setStyle(cfg.horizon);
-      container.selectAll(".horizon").datum(circle).attr("d", map);  
+      container.selectAll(parentElement + " .horizon").datum(circle).attr("d", map);  
       context.fill(); 
       if (cfg.horizon.stroke) context.stroke(); 
     }
@@ -682,7 +682,7 @@ Celestial.display = function(config) {
     
     mapProjection.rotate([0,0]);
     setStyle(cfg.background);
-    container.selectAll(".outline").attr("d", map);
+    container.selectAll(parentElement + " .outline").attr("d", map);
     if (stroke === true) {
       context.globalAlpha = 1;      
       context.stroke(); 
@@ -956,7 +956,7 @@ Celestial.display = function(config) {
       ctr = getAngles(Celestial.zenith());
     } 
     if (ctr) mapProjection.rotate(ctr);
-    container.selectAll("*").remove(); 
+    container.selectAll(parentElement + " *").remove(); 
     load(); 
   }; 
   this.apply = function(config) { apply(config); }; 
@@ -2255,7 +2255,7 @@ canvas.text = function () {
   
 
 */
-function $(id) { return document.getElementById(id); }
+function $(id) { return document.querySelector(parentElement + " #" + id); }
 function px(n) { return n + "px"; } 
 function Round(x, dg) { return(Math.round(Math.pow(10,dg)*x)/Math.pow(10,dg)); }
 function sign(x) { return x ? x < 0 ? -1 : 1 : 0; }
@@ -4580,13 +4580,7 @@ function exportSVG(fname) {
     groups[groupNames[i]] = svg.append('g').attr({"id": groupNames[i], ":inkscape:groupmode": "layer", ":inkscape:label": groupNames[i]});
     styles[groupNames[i]] = {};
   }
-/*
-  var background = svg.append('g'),
-      grid = svg.append('g'),
-      objects = svg.append('g'),
-      planets = svg.append('g'),
-      foreground = svg.append('g');
-*/  
+
   var graticule = d3.geo.graticule().minorStep([15,10]);
   
   var map = d3.geo.path().projection(projection);
@@ -5853,14 +5847,12 @@ function d3_eventDispatch(target) {
 
 })();
 // https://d3js.org/d3-queue/ Version 3.0.7. Copyright 2017 Mike Bostock.
-/*
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
 	(factory((global.d3 = global.d3 || {})));
 }(this, (function (exports) { 'use strict';
-*/
-(function() {
+
 var slice = [].slice;
 
 var noabort = {};
@@ -5983,10 +5975,11 @@ function queue(concurrency) {
   return new Queue(concurrency);
 }
 
+exports.queue = queue;
 d3.queue = queue;
 
-//Object.defineProperty(exports, '__esModule', { value: true });
+Object.defineProperty(exports, '__esModule', { value: true });
 
-})();
+})));
 this.Celestial = Celestial;
 })();
