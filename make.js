@@ -5,16 +5,16 @@ var shell = require('shelljs/make'),
 echo('Copying d3-celestial');
   
 cp('-f', [
-  '../d3-celestial/celestial.js', 
-  '../d3-celestial/celestial.min.js', 
-  '../d3-celestial/readme.md', 
-  '../d3-celestial/celestial.css'
+  '../d3-celestial-master/celestial.js', 
+  '../d3-celestial-master/celestial.min.js', 
+  '../d3-celestial-master/readme.md', 
+  '../d3-celestial-master/celestial.css'
 ], './');
 
-cp('-f', '../d3-celestial/data/*', 'data');
-cp('-f', '../d3-celestial/images/*', 'images');
-cp('-f', '../d3-celestial/lib/*', 'lib');
-cp('-f', '../d3-celestial/demo/*', 'celestial-demo');
+cp('-f', '../d3-celestial-master/data/*', 'data');
+cp('-f', '../d3-celestial-master/images/*', 'images');
+cp('-f', '../d3-celestial-master/lib/*', 'lib');
+cp('-f', '../d3-celestial-master/demo/*', 'celestial-demo');
 
 mv('-f', 'readme.md', 'celestial-demo/readme.md');
 /*
