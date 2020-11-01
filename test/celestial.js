@@ -98,7 +98,7 @@ Celestial.display = function(config) {
 
   d3.select(window).on('resize', resize);
 
-  if (cfg.controls === true && $("celestial-zoomin") === null) {
+  if (cfg.interactive === true && cfg.controls === true && $("celestial-zoomin") === null) {
     d3.select(parentElement).append("input").attr("type", "button").attr("id", "celestial-zoomin").attr("value", "\u002b").on("click", function () { zoomBy(1.25); return false; });
     d3.select(parentElement).append("input").attr("type", "button").attr("id", "celestial-zoomout").attr("value", "\u2212").on("click", function () { zoomBy(0.8); return false; });
   }
