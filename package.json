@@ -8,7 +8,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "shelljs": "^0.3.0"
+    "shelljs": ">=0.8.5"
   },
   "scripts": {
     "test": "node test/test.js"
