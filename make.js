@@ -1,6 +1,6 @@
 var shell = require('shelljs/make'),
     fs = require('fs'),
-    ga = "<script async src='https://www.googletagmanager.com/gtag/js?id=UA-105720254-1'></script><script>window.dataLayer=window.dataLayer||[]; function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'UA-105720254-1');</script>";
+    ga = "";
 
 echo('Copying d3-celestial');
   
